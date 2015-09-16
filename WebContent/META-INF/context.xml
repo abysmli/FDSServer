@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE webapp>
+<Context>
+    <Resource
+        name="jdbc/PMS" 
+        type="javax.sql.DataSource"
+        maxActive="100" 
+        maxIdle="30" 
+        maxWait="10000" 
+        url="jdbc:mysql://localhost/PMS"
+        driverClassName="com.mysql.jdbc.Driver"
+        username="PMS" 
+        password="PMS"
+    />
+</Context>
