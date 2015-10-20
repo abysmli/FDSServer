@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.PMS.model.DatabaseHandler;
 
@@ -22,6 +23,14 @@ import com.PMS.model.DatabaseHandler;
 public class PMSClientController {
 	
 	private DatabaseHandler database = new DatabaseHandler();
+	
+	@Path("/resetDatabase")
+	@GET
+	@Produces("application/json;charset=utf-8")
+	public Response resetDatabase() throws JSONException, NamingException, SQLException {
+		JSONObject result = database.resetDatabase();
+		return Response.status(200).entity(result.toString()).build();
+	}
 	
 	@Path("/getErrors")
 	@GET

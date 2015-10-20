@@ -372,4 +372,18 @@ public class DatabaseHandler {
 		this.releaseConnections();
 		return obj;
 	}
+
+	public JSONObject resetDatabase() throws SQLException, NamingException {
+		this.initConnections();
+		stmt.executeUpdate("UPDATE `PMS`.`component_table` SET `status` = 'active'");
+		stmt.executeUpdate("UPDATE `PMS`.`sub_system_table` SET `status` = 'active'");
+		stmt.executeUpdate("UPDATE `PMS`.`function_table` SET `status` = 'active'");
+		stmt.executeUpdate("UPDATE `PMS`.`sub_function_table` SET `status` = 'active'");
+		stmt.executeUpdate("UPDATE `PMS`.`main_function_table` SET `status` = 'active'");
+		stmt.executeUpdate("TRUNCATE `PMS`.`error_table`");
+		this.releaseConnections();
+		JSONObject obj = new JSONObject();
+		obj.put("result", "success");
+		return obj;
+	}
 }
