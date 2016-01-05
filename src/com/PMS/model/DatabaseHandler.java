@@ -57,6 +57,24 @@ public class DatabaseHandler {
 		return jsonarray;
 	}
 
+	public JSONArray getSymptoms() throws SQLException, NamingException {
+		this.initConnections();
+		ResultSet result = stmt.executeQuery("SELECT * FROM symptom_table");
+		JSONArray jsonarray = new JSONArray();
+		while (result.next()) {
+			JSONObject obj = new JSONObject();
+			obj.put("symptom_id", result.getInt(1));
+			obj.put("component_id", result.getInt(2));
+			obj.put("description", result.getString(3));
+			obj.put("min_limit", result.getDouble(4));
+			obj.put("max_limit", result.getDouble(5));
+			jsonarray.put(obj);
+		}
+		result.close();
+		this.releaseConnections();
+		return jsonarray;
+	}
+
 	public JSONArray getComponents() throws SQLException, NamingException {
 		this.initConnections();
 		ResultSet result = stmt.executeQuery("SELECT * FROM component_table");
@@ -67,10 +85,11 @@ public class DatabaseHandler {
 			obj.put("component_name", result.getString(2));
 			obj.put("series", result.getString(3));
 			obj.put("type", result.getString(4));
-			obj.put("component_desc", result.getString(5));
-			obj.put("activition", result.getString(6));
-			obj.put("status", result.getString(7));
-			obj.put("insert_date", result.getTimestamp(8));
+			obj.put("component_symbol", result.getString(5));
+			obj.put("component_desc", result.getString(6));
+			obj.put("activition", result.getString(7));
+			obj.put("status", result.getString(8));
+			obj.put("insert_date", result.getTimestamp(9));
 			jsonarray.put(obj);
 		}
 		result.close();

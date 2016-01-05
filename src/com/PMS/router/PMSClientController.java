@@ -39,7 +39,15 @@ public class PMSClientController {
 		JSONArray errors = database.getErrors();
 		return Response.status(200).entity(errors.toString()).build();
 	}
-
+	
+	@Path("/getSymptoms")
+	@GET
+	@Produces("application/json;charset=utf-8")
+	public Response getSymptoms() throws JSONException, NamingException, SQLException {
+		JSONArray symptoms = database.getSymptoms();
+		return Response.status(200).entity(symptoms.toString()).build();
+	}
+	
 	@Path("/getComponents")
 	@GET
 	@Produces("application/json;charset=utf-8")
@@ -111,4 +119,5 @@ public class PMSClientController {
 		JSONArray mainfunctionsubfunctionrel = database.getMainfunctionSubfunctionRel();
 		return Response.status(200).entity(mainfunctionsubfunctionrel.toString()).build();
 	}
+
 }

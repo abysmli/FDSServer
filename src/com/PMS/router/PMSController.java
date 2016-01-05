@@ -64,4 +64,17 @@ public class PMSController {
 		mResponse.put("result", "success");
 		return Response.status(200).entity(mResponse.toString()).build();
 	}
+	
+	@Path("/postComponentsValue")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response postComponentsValue(@FormParam("component_data") String componentData)
+			throws JSONException, SQLException, NamingException {
+		JSONObject mResult = new JSONObject(componentData);
+		System.out.println(mResult.toString());
+		JSONObject mResponse = new JSONObject();
+		mResponse.put("result", "success");
+		return Response.status(200).entity(mResponse.toString()).build();
+	}
 }
