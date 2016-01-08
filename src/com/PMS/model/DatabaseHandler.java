@@ -405,4 +405,25 @@ public class DatabaseHandler {
 		obj.put("result", "success");
 		return obj;
 	}
+
+	public void updateComponentValue(JSONObject mResult) throws SQLException, NamingException {
+		this.initConnections();
+		stmt.executeUpdate("INSERT INTO `PMS`.`component_value_buffer_table` (meta_data, process_id, timestamp) VALUES ('"+ mResult.getJSONArray("components").toString() +"', "+ mResult.getInt("process_id") +", "+ mResult.getString("stamp_time")+")");
+		this.releaseConnections();
+	}
+
+	public JSONObject getLastComponentValue() throws NamingException, SQLException {
+		this.initConnections();
+		ResultSet result = stmt.executeQuery("SELECT * FROM `component_value_buffer_table` ORDER BY id DESC LIMIT 1");
+		JSONObject obj = new JSONObject();
+		while (result.next()) {
+			obj.put("id", result.getLong(1));
+			obj.put("components", new JSONArray(result.getString(2)));
+			obj.put("process_id", result.getInt(3));
+			obj.put("stamp_time", result.getString(4));
+		}
+		result.close();
+		this.releaseConnections();
+		return obj;
+	}
 }

@@ -21,12 +21,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.PMS.controller.ErrorController;
+import com.PMS.model.DatabaseHandler;
 
 @Path("/")
 public class PMSController {
 
 	ErrorController errorController = new ErrorController();
-
+	private DatabaseHandler database = new DatabaseHandler();
+	
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public String welcomePMS() {
@@ -72,7 +74,7 @@ public class PMSController {
 	public Response postComponentsValue(@FormParam("component_data") String componentData)
 			throws JSONException, SQLException, NamingException {
 		JSONObject mResult = new JSONObject(componentData);
-		System.out.println(mResult.toString());
+		database.updateComponentValue(mResult);
 		JSONObject mResponse = new JSONObject();
 		mResponse.put("result", "success");
 		return Response.status(200).entity(mResponse.toString()).build();
