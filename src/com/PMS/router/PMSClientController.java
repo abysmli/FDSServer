@@ -56,6 +56,14 @@ public class PMSClientController {
 		return Response.status(200).entity(components.toString()).build();
 	}
 	
+	@Path("/getLastComponentValue")
+	@GET
+	@Produces("application/json;charset=utf-8")
+	public Response getLastComponentValue() throws JSONException, NamingException, SQLException {
+		JSONObject lastComponentValue = database.getLastComponentValue();
+		return Response.status(200).entity(lastComponentValue.toString()).build();
+	}
+	
 	@Path("/getSubsystems")
 	@GET
 	@Produces("application/json;charset=utf-8")

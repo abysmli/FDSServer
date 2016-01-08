@@ -9,7 +9,7 @@
         maxWait="10000" 
         url="jdbc:mysql://localhost/PMS"
         driverClassName="com.mysql.jdbc.Driver"
-        username="PMS" 
-        password="PMS"
+        username="root" 
+        password="root"
     />
 </Context>
