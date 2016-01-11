@@ -32,12 +32,12 @@ public class PMSClientController {
 		return Response.status(200).entity(result.toString()).build();
 	}
 	
-	@Path("/getErrors")
+	@Path("/getFaults")
 	@GET
 	@Produces("application/json;charset=utf-8")
-	public Response getErrors() throws JSONException, NamingException, SQLException {
-		JSONArray errors = database.getErrors();
-		return Response.status(200).entity(errors.toString()).build();
+	public Response getFaults() throws JSONException, NamingException, SQLException {
+		JSONArray faults = database.getFaults();
+		return Response.status(200).entity(faults.toString()).build();
 	}
 	
 	@Path("/getSymptoms")
@@ -62,6 +62,14 @@ public class PMSClientController {
 	public Response getLastComponentValue() throws JSONException, NamingException, SQLException {
 		JSONObject lastComponentValue = database.getLastComponentValue();
 		return Response.status(200).entity(lastComponentValue.toString()).build();
+	}
+	
+	@Path("/getComponentValue")
+	@GET
+	@Produces("application/json;charset=utf-8")
+	public Response getComponentValue() throws JSONException, NamingException, SQLException {
+		JSONArray componentValue = database.getComponentValue();
+		return Response.status(200).entity(componentValue.toString()).build();
 	}
 	
 	@Path("/getSubsystems")
@@ -128,4 +136,12 @@ public class PMSClientController {
 		return Response.status(200).entity(mainfunctionsubfunctionrel.toString()).build();
 	}
 
+	@Path("/getFaultProcedureInfos")
+	@GET
+	@Produces("application/json;charset=utf-8")
+	public Response getFaultProcedureInfos() throws JSONException, NamingException, SQLException {
+		JSONArray faultprocedures = database.getFaultProcedureInfos();
+		return Response.status(200).entity(faultprocedures.toString()).build();
+	}
+	
 }

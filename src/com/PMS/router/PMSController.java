@@ -20,13 +20,13 @@ import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.PMS.controller.ErrorController;
+import com.PMS.controller.FaultController;
 import com.PMS.model.DatabaseHandler;
 
 @Path("/")
 public class PMSController {
 
-	ErrorController errorController = new ErrorController();
+	FaultController faultController = new FaultController();
 	private DatabaseHandler database = new DatabaseHandler();
 	
 	@GET
@@ -44,13 +44,13 @@ public class PMSController {
 		return Response.status(200).entity(mStatus.toString()).build();
 	}
 
-	@Path("/reportError")
+	@Path("/reportFault")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response reportError(@FormParam("component_id") int component_id, @FormParam("error_type") String error_type,
-			@FormParam("error_desc") String error_desc) throws JSONException, SQLException, NamingException {
-		JSONObject mResult = errorController.handleError(component_id, error_type, error_desc);
+	public Response reportFault(@FormParam("fault_data") String faultdata) throws JSONException, SQLException, NamingException {
+		JSONObject mFaultData = new JSONObject(faultdata);
+		JSONObject mResult = faultController.handleFault(mFaultData.getInt("component_id"), mFaultData.getString("series"), mFaultData.getString("fault_type"), mFaultData.getString("fault_desc"));
 		return Response.status(200).entity(mResult.toString()).build();
 	}
 
@@ -61,7 +61,7 @@ public class PMSController {
 	public Response updateStatus(@FormParam("updateMeta") String updateMeta)
 			throws JSONException, SQLException, NamingException {
 		JSONObject mResult = new JSONObject(updateMeta);
-		errorController.updateStatus(mResult);
+		faultController.updateStatus(mResult);
 		JSONObject mResponse = new JSONObject();
 		mResponse.put("result", "success");
 		return Response.status(200).entity(mResponse.toString()).build();
