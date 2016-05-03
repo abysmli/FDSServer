@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE webapp>
-<Context>
+<Context path="/FDS">
     <Resource
-        name="jdbc/PMS" 
+        name="jdbc/FDS"
         type="javax.sql.DataSource"
         maxActive="100" 
         maxIdle="30" 
-        maxWait="10000" 
-        url="jdbc:mysql://localhost/PMS"
-        driverClassName="com.mysql.jdbc.Driver"
-        username="PMS" 
-        password="PMS"
+        maxWait="10000"
+        url="jdbc:mysql://localhost:3306/FDS" 
+        driverClassName="com.mysql.jdbc.Driver" 
+        username="FDS"
+        password="FDS" 
     />
 </Context>
