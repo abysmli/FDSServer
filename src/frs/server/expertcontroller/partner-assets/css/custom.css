@@ -1,0 +1,18 @@
+.input-group.date {
+    padding: 0 15px;
+}
+
+.ui-datepicker-title select {
+	border-width: 1px;
+    border-style: solid;
+	border-radius: 0px;
+    border-color: rgb(169, 169, 169);
+	height: 25px !important;
+	padding: 1px;
+	margin: 1px;
+	color: black;
+}
+
+.ui-datepicker {
+	z-index: 3000 !important;
+}

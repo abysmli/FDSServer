@@ -1,13 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE webapp>
-<Context path="/FDS">
+<Context path="/FRS">
     <Resource
-        name="jdbc/FDS"
+        name="jdbc/FRS_SystemKnowledge"
         type="javax.sql.DataSource"
         maxActive="100" 
         maxIdle="30" 
         maxWait="10000"
-        url="jdbc:mysql://localhost:3306/FDS" 
+        url="jdbc:mysql://localhost:3306/FRS_SystemKnowledge?autoReconnect=true" 
+        driverClassName="com.mysql.jdbc.Driver" 
+        username="FDS"
+        password="FDS" 
+    />
+    <Resource
+        name="jdbc/FRS_SymptomKnowledge"
+        type="javax.sql.DataSource"
+        maxActive="100" 
+        maxIdle="30" 
+        maxWait="10000"
+        url="jdbc:mysql://localhost:3306/FRS_SymptomKnowledge?autoReconnect=true" 
+        driverClassName="com.mysql.jdbc.Driver" 
+        username="FDS"
+        password="FDS" 
+    />
+    <Resource
+        name="jdbc/FRS_FaultKnowledge"
+        type="javax.sql.DataSource"
+        maxActive="100" 
+        maxIdle="30" 
+        maxWait="10000"
+        url="jdbc:mysql://localhost:3306/FRS_FaultKnowledge?autoReconnect=true" 
         driverClassName="com.mysql.jdbc.Driver" 
         username="FDS"
         password="FDS" 

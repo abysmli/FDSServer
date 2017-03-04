@@ -1,0 +1,93 @@
+/**
+ * @author Li, Yuan
+ * Project: FDS
+ */
+
+package frs.server.router;
+
+import java.sql.SQLException;
+
+import javax.naming.NamingException;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import frs.server.controller.FaultController;
+import frs.server.model.SymptomDatabaseHandler;
+
+@Path("/")
+public class FDSRouter {
+
+	FaultController faultController = new FaultController();
+	private final SymptomDatabaseHandler databaseSymptom = new SymptomDatabaseHandler();
+	
+	@GET
+	@Produces(MediaType.TEXT_HTML)
+	public String welcomeFDS() {
+		return "<html><title>FRS Server Backend</title><link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Jura'><body><p style=\"margin-top:3em; text-align:center; font-size: 4em; font-family: 'Frutiger', serif;\">Welcome to FRS Server System!</p><p style='text-align:center;'>Cataline Base: "+System.getProperty("catalina.base")+ "</p></body></html>";
+	}
+	
+	@Path("/status")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getStatus() throws JSONException {
+		JSONObject mStatus = new JSONObject();
+		mStatus.put("status", "running");
+		return Response.status(200).entity(mStatus.toString()).build();
+	}
+
+        @Path("/test")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getTest() throws JSONException, SQLException, NamingException {
+		JSONObject mStatus = new JSONObject();
+		
+		return Response.status(200).entity(databaseSymptom.getSymptomPumping().toString()).build();
+	}
+        
+	@Path("/reportFault")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response reportFault(@FormParam("fault_data") String faultdata) throws JSONException, SQLException, NamingException {
+		JSONObject mFaultData = new JSONObject(faultdata);
+                System.out.println(mFaultData);
+		JSONObject mResult = faultController.handleFault(mFaultData.getInt("component_id"), mFaultData.getString("series"), mFaultData.getString("fault_type"), mFaultData.getString("fault_desc"));
+                System.out.println(mResult);
+		return Response.status(200).entity(mResult.toString()).build();
+	}
+
+	@Path("/updateStatus")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response updateStatus(@FormParam("updateMeta") String updateMeta)
+			throws JSONException, SQLException, NamingException {
+		JSONObject mResult = new JSONObject(updateMeta);
+		faultController.updateStatus(mResult);
+		JSONObject mResponse = new JSONObject();
+		mResponse.put("result", "success");
+		return Response.status(200).entity(mResponse.toString()).build();
+	}
+	
+	@Path("/postComponentsValue")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response postComponentsValue(@FormParam("component_data") String componentData)
+			throws JSONException, SQLException, NamingException {
+		JSONObject mResult = new JSONObject(componentData);
+		databaseSymptom.updateComponentValue(mResult);
+		JSONObject mResponse = new JSONObject();
+		mResponse.put("result", "success");
+		return Response.status(200).entity(mResponse.toString()).build();
+	}
+}

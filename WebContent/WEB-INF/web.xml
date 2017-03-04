@@ -3,7 +3,7 @@
 	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
 	version="3.1">
-	<display-name>FDS</display-name>
+	<display-name>FRS</display-name>
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
 		<welcome-file>index.htm</welcome-file>
@@ -13,16 +13,16 @@
 		<welcome-file>default.jsp</welcome-file>
 	</welcome-file-list>
 	<servlet>
-		<servlet-name>FDS</servlet-name>
+		<servlet-name>FRS</servlet-name>
 		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>FDS</servlet-name>
+		<servlet-name>FRS</servlet-name>
 		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
 	<resource-env-ref>
-		<resource-env-ref-name>jdbc/FDS</resource-env-ref-name>
+		<resource-env-ref-name>jdbc/FRS</resource-env-ref-name>
 		<resource-env-ref-type>javax.sql.DataSource</resource-env-ref-type>
 	</resource-env-ref>
 </web-app>
