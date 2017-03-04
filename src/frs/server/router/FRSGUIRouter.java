@@ -5,6 +5,7 @@
 
 package frs.server.router;
 
+import frs.server.model.FaultDatabaseHandler;
 import java.sql.SQLException;
 
 import javax.naming.NamingException;
@@ -18,17 +19,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import frs.server.model.SymptomDatabaseHandler;
+import frs.server.model.SystemDatabaseHandler;
 
 @Path("/client")
 public class FRSGUIRouter {
 	
-	private final SymptomDatabaseHandler database = new SymptomDatabaseHandler();
+	private final SymptomDatabaseHandler databaseSymptom = new SymptomDatabaseHandler();
+	private final FaultDatabaseHandler databaseFault = new FaultDatabaseHandler();
+        private final SystemDatabaseHandler databaseSystem = new SystemDatabaseHandler();
 	
 	@Path("/resetDatabase")
 	@GET
 	@Produces("application/json;charset=utf-8")
 	public Response resetDatabase() throws JSONException, NamingException, SQLException {
-		JSONObject result = database.resetDatabase();
+		JSONObject result = databaseSystem.resetDatabase();
 		return Response.status(200).entity(result.toString()).build();
 	}
 	
@@ -36,7 +40,7 @@ public class FRSGUIRouter {
 	@GET
 	@Produces("application/json;charset=utf-8")
 	public Response getFaults() throws JSONException, NamingException, SQLException {
-		JSONArray faults = database.getFaults();
+		JSONArray faults = databaseFault.getFaultKnowledge();
 		return Response.status(200).entity(faults.toString()).build();
 	}
 	
@@ -44,7 +48,7 @@ public class FRSGUIRouter {
 	@GET
 	@Produces("application/json;charset=utf-8")
 	public Response getSymptoms() throws JSONException, NamingException, SQLException {
-		JSONArray symptoms = database.getSymptomSubsystem();
+		JSONArray symptoms = databaseSymptom.getSymptomSubsystem();
 		return Response.status(200).entity(symptoms.toString()).build();
 	}
 	
@@ -52,7 +56,7 @@ public class FRSGUIRouter {
 	@GET
 	@Produces("application/json;charset=utf-8")
 	public Response getComponents() throws JSONException, NamingException, SQLException {
-		JSONArray components = database.getComponents();
+		JSONArray components = databaseSystem.getComponents();
 		return Response.status(200).entity(components.toString()).build();
 	}
 	
@@ -60,7 +64,7 @@ public class FRSGUIRouter {
 	@GET
 	@Produces("application/json;charset=utf-8")
 	public Response getLastComponentValue() throws JSONException, NamingException, SQLException {
-		JSONObject lastComponentValue = database.getLastComponentValue();
+		JSONObject lastComponentValue = databaseSystem.getLastComponentValue();
 		return Response.status(200).entity(lastComponentValue.toString()).build();
 	}
 	
@@ -68,7 +72,7 @@ public class FRSGUIRouter {
 	@GET
 	@Produces("application/json;charset=utf-8")
 	public Response getComponentValue() throws JSONException, NamingException, SQLException {
-		JSONArray componentValue = database.getComponentValue();
+		JSONArray componentValue = databaseSystem.getComponentValue();
 		return Response.status(200).entity(componentValue.toString()).build();
 	}
 	
@@ -76,7 +80,7 @@ public class FRSGUIRouter {
 	@GET
 	@Produces("application/json;charset=utf-8")
 	public Response getSubsystems() throws JSONException, NamingException, SQLException {
-		JSONArray subsystems = database.getSubsystems();
+		JSONArray subsystems = databaseSystem.getSubsystems();
 		return Response.status(200).entity(subsystems.toString()).build();
 	}
 	
@@ -84,7 +88,7 @@ public class FRSGUIRouter {
 	@GET
 	@Produces("application/json;charset=utf-8")
 	public Response getFunctions() throws JSONException, NamingException, SQLException {
-		JSONArray functions = database.getFunctions();
+		JSONArray functions = databaseSystem.getFunctions();
 		return Response.status(200).entity(functions.toString()).build();
 	}
 	
@@ -92,7 +96,7 @@ public class FRSGUIRouter {
 	@GET
 	@Produces("application/json;charset=utf-8")
 	public Response getSubfunctions() throws JSONException, NamingException, SQLException {
-		JSONArray subfunctions = database.getSubfunctions();
+		JSONArray subfunctions = databaseSystem.getSubfunctions();
 		return Response.status(200).entity(subfunctions.toString()).build();
 	}
 	
@@ -100,7 +104,7 @@ public class FRSGUIRouter {
 	@GET
 	@Produces("application/json;charset=utf-8")
 	public Response getMainfunctions() throws JSONException, NamingException, SQLException {
-		JSONArray mainfunctions = database.getMainfunctions();
+		JSONArray mainfunctions = databaseSystem.getMainfunctions();
 		return Response.status(200).entity(mainfunctions.toString()).build();
 	}
 	
@@ -108,7 +112,7 @@ public class FRSGUIRouter {
 	@GET
 	@Produces("application/json;charset=utf-8")
 	public Response getSubsystemComponentRel() throws JSONException, NamingException, SQLException {
-		JSONArray subsystemcomponentrel = database.getSubsystemComponentRel();
+		JSONArray subsystemcomponentrel = databaseSystem.getSubsystemComponentRel();
 		return Response.status(200).entity(subsystemcomponentrel.toString()).build();
 	}
 	
@@ -116,7 +120,7 @@ public class FRSGUIRouter {
 	@GET
 	@Produces("application/json;charset=utf-8")
 	public Response getComponentFunctionRel() throws JSONException, NamingException, SQLException {
-		JSONArray componentfunctionrel = database.getComponentFunctionRel();
+		JSONArray componentfunctionrel = databaseSystem.getComponentFunctionRel();
 		return Response.status(200).entity(componentfunctionrel.toString()).build();
 	}
 	
@@ -124,7 +128,7 @@ public class FRSGUIRouter {
 	@GET
 	@Produces("application/json;charset=utf-8")
 	public Response getSubfunctionFunctionRel() throws JSONException, NamingException, SQLException {
-		JSONArray subfunctionfunctionrel = database.getSubfunctionFunctionRel();
+		JSONArray subfunctionfunctionrel = databaseSystem.getSubfunctionFunctionRel();
 		return Response.status(200).entity(subfunctionfunctionrel.toString()).build();
 	}
 	
@@ -132,7 +136,7 @@ public class FRSGUIRouter {
 	@GET
 	@Produces("application/json;charset=utf-8")
 	public Response getMainfunctionSubfunctionRel() throws JSONException, NamingException, SQLException {
-		JSONArray mainfunctionsubfunctionrel = database.getMainfunctionSubfunctionRel();
+		JSONArray mainfunctionsubfunctionrel = databaseSystem.getMainfunctionSubfunctionRel();
 		return Response.status(200).entity(mainfunctionsubfunctionrel.toString()).build();
 	}
 
@@ -140,7 +144,7 @@ public class FRSGUIRouter {
 	@GET
 	@Produces("application/json;charset=utf-8")
 	public Response getFaultProcedureInfos() throws JSONException, NamingException, SQLException {
-		JSONArray faultprocedures = database.getFaultProcedureInfos();
+		JSONArray faultprocedures = databaseFault.getFaultProcedureInfos();
 		return Response.status(200).entity(faultprocedures.toString()).build();
 	}
 	
