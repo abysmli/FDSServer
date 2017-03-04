@@ -1,2 +1,2 @@
-# FDSServer
-FDS Server for Fault Diagnose System
+# FRSServer
+FRS Server for Fault Reconfiguration System
