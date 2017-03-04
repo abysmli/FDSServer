@@ -125,6 +125,31 @@ public class FaultDatabaseHandler {
                 + "', CURRENT_TIMESTAMP)");
         this.releaseConnections();
     }
+    
+    public JSONObject getFaultInfobyComponent(int mComponetID) throws SQLException, NamingException {
+        this.initConnections();
+        ResultSet result = stmt.executeQuery("SELECT * FROM fault_knowledge WHERE fault_location = " + mComponetID);
+        JSONObject obj = new JSONObject();
+        while (result.next()) {            
+            obj.put("fault_id", result.getInt(1));
+            obj.put("fault_no", result.getInt(2));
+            obj.put("fault_name", result.getString(3));
+            obj.put("symptom_id", result.getInt(4));
+            obj.put("symptom_desc", result.getString(5));
+            obj.put("available_functions", result.getString(6));
+            obj.put("reconf_command", result.getString(7));
+            obj.put("fault_effect", result.getString(8));
+            obj.put("fault_location", result.getString(9));
+            obj.put("fault_message", result.getString(10));
+            obj.put("check_status", result.getString(11));
+            obj.put("equipment_id", result.getString(12));
+            obj.put("occured_at", result.getTimestamp(13));
+            obj.put("update_at", result.getTimestamp(14));
+        }
+        result.close();
+        this.releaseConnections();
+        return obj;
+    }
 
     public JSONArray getFaultProcedureInfos() throws NamingException, SQLException {
         this.initConnections();
@@ -151,7 +176,7 @@ public class FaultDatabaseHandler {
             String diagnoseProcedureInfo, String solution) throws NamingException, SQLException {
         this.initConnections();
         stmt.executeUpdate(
-                "INSERT INTO `FRS`.`fault_diagnose_buffer_table` (diagnose_procedure, fault_desc, fault_type, component_id, series, solution) VALUES ('"
+                "INSERT INTO `fault_diagnose_buffer_table` (diagnose_procedure, fault_desc, fault_type, component_id, series, solution) VALUES ('"
                 + diagnoseProcedureInfo + "', '" + faultDesc + "', '" + faultType + "', " + componetID + ", '"
                 + series + "', '" + solution + "')");
         this.releaseConnections();

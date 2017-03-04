@@ -1,5 +1,6 @@
 package frs.server.controller;
 
+import frs.server.model.FaultDatabaseHandler;
 import java.sql.SQLException;
 
 import javax.naming.NamingException;
@@ -9,12 +10,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import frs.server.model.SymptomDatabaseHandler;
+import frs.server.model.SystemDatabaseHandler;
 
 public class UserController {
-	private SymptomDatabaseHandler database = new SymptomDatabaseHandler();
+	private final SymptomDatabaseHandler databaseSymptom = new SymptomDatabaseHandler();
+	private final FaultDatabaseHandler databaseFault = new FaultDatabaseHandler();
+        private final SystemDatabaseHandler databaseSystem = new SystemDatabaseHandler();
 
 	public JSONObject getUser(String username, String password) throws NamingException, SQLException, JSONException {
-		JSONObject obj = database.getUser(username);
+		JSONObject obj = databaseSystem.getUser(username);
 		if (obj.getString("password").equals(password)) {
 			obj.put("status", "success");
 		} else {

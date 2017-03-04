@@ -1,5 +1,6 @@
 package frs.server.controller;
 
+import frs.server.model.FaultDatabaseHandler;
 import java.util.Date;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -14,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import frs.server.model.SymptomDatabaseHandler;
+import frs.server.model.SystemDatabaseHandler;
 
 /**
  * @author Li, Yuan Project: FDSServer
@@ -21,7 +23,10 @@ import frs.server.model.SymptomDatabaseHandler;
 
 public class FaultController {
 
-	private final SymptomDatabaseHandler database = new SymptomDatabaseHandler();
+	private final SymptomDatabaseHandler databaseSymptom = new SymptomDatabaseHandler();
+	private final FaultDatabaseHandler databaseFault = new FaultDatabaseHandler();
+        private final SystemDatabaseHandler databaseSystem = new SystemDatabaseHandler();
+        
 	int step = 1;
 	JSONArray DiagnoseProcedureInfo = new JSONArray();
 
@@ -113,12 +118,12 @@ public class FaultController {
                 default:
                     break;
             }
-		database.saveFaultDiagnoseProcedure(mComponetID, mSeries, fault_type, fault_desc, DiagnoseProcedureInfo.toString(), FaultObj.getJSONObject("execute_command").toString());
+		databaseFault.saveFaultDiagnoseProcedure(mComponetID, mSeries, fault_type, fault_desc, DiagnoseProcedureInfo.toString(), FaultObj.getJSONObject("execute_command").toString());
 		return FaultObj;
 	}
 
 	private JSONObject handleKnownFault(int mComponetID, String mSeries) throws SQLException, NamingException {
-		return database.getFaultInfobyComponent(mComponetID);
+		return databaseFault.getFaultInfobyComponent(mComponetID);
 	}
 
 	public JSONObject handleUnknownFault(int mComponentID, String mSeries, String fault_type, String fault_desc)
@@ -142,7 +147,7 @@ public class FaultController {
 		mMainObj.put("fault_desc", fault_desc);
 		mMainObj.put("execute_command", mExecutionObj);
 		mMainObj.put("insert_date", dateFormat.format(date));
-		database.saveFault(mMainObj);
+		databaseFault.saveFaultKnowledge(mMainObj);
 
 		generateFaultDiagnoseInfo(step++, mSeries,
 				"Scanning [Deployment Matrix] to obtain [Deployment] relationed Components ...",
@@ -157,7 +162,7 @@ public class FaultController {
 	}
 
 	private JSONArray getMainfunctionIDbySubfunction(JSONArray mSubfunctionIDs) throws SQLException, NamingException {
-		List<Integer> mMainfunctionID = database.getMainfunctionIDbySubfunction(mSubfunctionIDs);
+		List<Integer> mMainfunctionID = databaseSystem.getMainfunctionIDbySubfunction(mSubfunctionIDs);
 		Iterator<Integer> mMainfunctionIterator = mMainfunctionID.iterator();
 		JSONArray mMainfunctionArray = new JSONArray();
 
@@ -168,7 +173,7 @@ public class FaultController {
 	}
 
 	private JSONArray getSubfunctionIDbyFunction(JSONArray mFunctionIDs) throws SQLException, NamingException {
-		List<Integer> mSubfunctionID = database.getSubfunctionIDbyFunction(mFunctionIDs);
+		List<Integer> mSubfunctionID = databaseSystem.getSubfunctionIDbyFunction(mFunctionIDs);
 		Iterator<Integer> mSubfunctionIterator = mSubfunctionID.iterator();
 		JSONArray mSubfunctionArray = new JSONArray();
 
@@ -179,7 +184,7 @@ public class FaultController {
 	}
 
 	private JSONArray getFunctionIDbyComponent(int mComponentID) throws SQLException, NamingException {
-		List<Integer> mFunctionsID = database.getFunctionIDbyComponent(mComponentID);
+		List<Integer> mFunctionsID = databaseSystem.getFunctionIDbyComponent(mComponentID);
 		Iterator<Integer> mFunctionsIterator = mFunctionsID.iterator();
 		JSONArray mFunctionArray = new JSONArray();
 
@@ -190,7 +195,7 @@ public class FaultController {
 	}
 
 	private JSONArray getSubsystemIDbyComponent(int mComponentID) throws SQLException, NamingException {
-		List<Integer> mSubsystemID = database.getSubsystemIDbyComponent(mComponentID);
+		List<Integer> mSubsystemID = databaseSystem.getSubsystemIDbyComponent(mComponentID);
 		Iterator<Integer> mSubsystemIterator = mSubsystemID.iterator();
 		JSONArray mSubsystemArray = new JSONArray();
 
@@ -201,11 +206,11 @@ public class FaultController {
 	}
 
 	public void updateStatus(JSONObject mResult) throws JSONException, NamingException, SQLException {
-		database.updateComponents(mResult.getInt("component"));
-		database.updateFunctions(mResult.getJSONArray("functions"));
-		database.updateSubsystems(mResult.getJSONArray("subsystems"));
-		database.updateSubfunctions(mResult.getJSONArray("subfunctions"));
-		database.updateMainfunctions(mResult.getJSONArray("mainfunctions"));
+		databaseSystem.updateComponents(mResult.getInt("component"));
+		databaseSystem.updateFunctions(mResult.getJSONArray("functions"));
+		databaseSystem.updateSubsystems(mResult.getJSONArray("subsystems"));
+		databaseSystem.updateSubfunctions(mResult.getJSONArray("subfunctions"));
+		databaseSystem.updateMainfunctions(mResult.getJSONArray("mainfunctions"));
 	}
 
 	private void generateFaultDiagnoseInfo(int step, String mPosition, String mDo, String mResult) {

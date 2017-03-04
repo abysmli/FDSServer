@@ -21,14 +21,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import frs.server.controller.FaultController;
+import frs.server.model.FaultDatabaseHandler;
 import frs.server.model.SymptomDatabaseHandler;
+import frs.server.model.SystemDatabaseHandler;
 
 @Path("/")
-public class FDSRouter {
+public class FDSSimulatorRouter {
 
 	FaultController faultController = new FaultController();
 	private final SymptomDatabaseHandler databaseSymptom = new SymptomDatabaseHandler();
-	
+	private final FaultDatabaseHandler databaseFault = new FaultDatabaseHandler();
+        private final SystemDatabaseHandler databaseSystem = new SystemDatabaseHandler();
+        
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public String welcomeFDS() {
@@ -47,9 +51,7 @@ public class FDSRouter {
         @Path("/test")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getTest() throws JSONException, SQLException, NamingException {
-		JSONObject mStatus = new JSONObject();
-		
+	public Response getTest() throws JSONException, SQLException, NamingException {		
 		return Response.status(200).entity(databaseSymptom.getSymptomPumping().toString()).build();
 	}
         
@@ -85,7 +87,7 @@ public class FDSRouter {
 	public Response postComponentsValue(@FormParam("component_data") String componentData)
 			throws JSONException, SQLException, NamingException {
 		JSONObject mResult = new JSONObject(componentData);
-		databaseSymptom.updateComponentValue(mResult);
+		databaseSystem.updateComponentValue(mResult);
 		JSONObject mResponse = new JSONObject();
 		mResponse.put("result", "success");
 		return Response.status(200).entity(mResponse.toString()).build();

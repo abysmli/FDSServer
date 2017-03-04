@@ -42,43 +42,6 @@ public class SystemDatabaseHandler {
         this.connection.close();
     }
 
-    public JSONArray getFaults() throws SQLException, NamingException {
-        this.initConnections();
-        ResultSet result = stmt.executeQuery("SELECT * FROM fault_table");
-        JSONArray jsonarray = new JSONArray();
-        while (result.next()) {
-            JSONObject obj = new JSONObject();
-            obj.put("fault_id", result.getInt(1));
-            obj.put("component_id", result.getInt(2));
-            obj.put("fault_type", result.getString(3));
-            obj.put("fault_desc", result.getString(4));
-            obj.put("execute_command", result.getString(5));
-            obj.put("insert_date", result.getTimestamp(6));
-            jsonarray.put(obj);
-        }
-        result.close();
-        this.releaseConnections();
-        return jsonarray;
-    }
-
-    public JSONArray getSymptoms() throws SQLException, NamingException {
-        this.initConnections();
-        ResultSet result = stmt.executeQuery("SELECT * FROM FRS_SymptomKnowledge.symptom_subsystem");
-        JSONArray jsonarray = new JSONArray();
-        while (result.next()) {
-            JSONObject obj = new JSONObject();
-            obj.put("symptom_id", result.getInt(1));
-            obj.put("subsystem_id", result.getInt(2));
-            obj.put("subsystem_name", result.getString(3));
-            obj.put("component_id", result.getInt(4));
-            obj.put("result", result.getString(5));
-            jsonarray.put(obj);
-        }
-        result.close();
-        this.releaseConnections();
-        return jsonarray;
-    }
-
     public JSONArray getComponents() throws SQLException, NamingException {
         this.initConnections();
         ResultSet result = stmt.executeQuery("SELECT * FROM component_table");
@@ -304,27 +267,10 @@ public class SystemDatabaseHandler {
         return MainfunctionIDs;
     }
 
-    public JSONObject getFaultInfobyComponent(int mComponetID) throws SQLException, NamingException {
-        this.initConnections();
-        ResultSet result = stmt.executeQuery("SELECT * FROM fault_table WHERE component_id = " + mComponetID);
-        JSONObject faultobj = new JSONObject();
-        while (result.next()) {
-            faultobj.put("fault_id", result.getInt(1));
-            faultobj.put("component_id", result.getInt(2));
-            faultobj.put("fault_type", result.getString(3));
-            faultobj.put("fault_desc", result.getString(4));
-            faultobj.put("execute_command", new JSONObject(result.getString(5)));
-            faultobj.put("insert_date", result.getTimestamp(6));
-        }
-        result.close();
-        this.releaseConnections();
-        return faultobj;
-    }
-
     public void saveFault(JSONObject mMainObj) throws SQLException, NamingException {
         this.initConnections();
         stmt.executeUpdate(
-                "INSERT INTO `FRS`.`fault_table` (`fault_id`, `component_id`, `fault_type`, `fault_desc`, `execute_command`, `insert_date`, `update_date`) VALUES (NULL, '"
+                "INSERT INTO `fault_table` (`fault_id`, `component_id`, `fault_type`, `fault_desc`, `execute_command`, `insert_date`, `update_date`) VALUES (NULL, '"
                 + mMainObj.getInt("component_id") + "', '" + mMainObj.getString("fault_type") + "', '"
                 + mMainObj.getString("fault_desc") + "', '" + mMainObj.getJSONObject("execute_command")
                 + "', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)");
@@ -334,7 +280,7 @@ public class SystemDatabaseHandler {
     public void updateComponents(int componentId) throws NamingException, SQLException {
         this.initConnections();
         stmt.executeUpdate(
-                "UPDATE `FRS`.`component_table` SET `status` = 'inactive' WHERE `component_table`.`component_id` = "
+                "UPDATE `component_table` SET `status` = 'inactive' WHERE `component_table`.`component_id` = "
                 + componentId);
         this.releaseConnections();
     }
@@ -343,7 +289,7 @@ public class SystemDatabaseHandler {
         this.initConnections();
         for (int i = 0; i < Functions.length(); i++) {
             stmt.executeUpdate(
-                    "UPDATE `FRS`.`function_table` SET `status` = 'inactive' WHERE `function_table`.`function_id` = "
+                    "UPDATE `function_table` SET `status` = 'inactive' WHERE `function_table`.`function_id` = "
                     + Functions.getInt(i));
         }
         this.releaseConnections();
@@ -353,7 +299,7 @@ public class SystemDatabaseHandler {
         this.initConnections();
         for (int i = 0; i < Subsystems.length(); i++) {
             stmt.executeUpdate(
-                    "UPDATE `FRS`.`sub_system_table` SET `status` = 'inactive' WHERE `sub_system_table`.`subsystem_id` = "
+                    "UPDATE `sub_system_table` SET `status` = 'inactive' WHERE `sub_system_table`.`subsystem_id` = "
                     + Subsystems.getInt(i));
         }
         this.releaseConnections();
@@ -363,7 +309,7 @@ public class SystemDatabaseHandler {
         this.initConnections();
         for (int i = 0; i < Subfunctions.length(); i++) {
             stmt.executeUpdate(
-                    "UPDATE `FRS`.`sub_function_table` SET `status` = 'inactive' WHERE `sub_function_table`.`subfunction_id` = "
+                    "UPDATE `sub_function_table` SET `status` = 'inactive' WHERE `sub_function_table`.`subfunction_id` = "
                     + Subfunctions.getInt(i));
         }
         this.releaseConnections();
@@ -373,33 +319,16 @@ public class SystemDatabaseHandler {
         this.initConnections();
         for (int i = 0; i < Mainfunctions.length(); i++) {
             stmt.executeUpdate(
-                    "UPDATE `FRS`.`main_function_table` SET `status` = 'inactive' WHERE `main_function_table`.`mainfunction_id` = "
+                    "UPDATE `main_function_table` SET `status` = 'inactive' WHERE `main_function_table`.`mainfunction_id` = "
                     + Mainfunctions.getInt(i));
         }
         this.releaseConnections();
     }
 
-    public JSONObject getUser(String username) throws NamingException, SQLException {
-        this.initConnections();
-        ResultSet result = stmt.executeQuery("SELECT * FROM `user_table` WHERE `username` = '" + username + "'");
-        JSONObject obj = new JSONObject();
-        while (result.next()) {
-            obj.put("userid", result.getInt(1));
-            obj.put("username", result.getString(2));
-            obj.put("password", result.getString(3));
-            obj.put("email", result.getString(4));
-            obj.put("level", result.getString(5));
-            obj.put("insert_date", result.getTimestamp(6));
-        }
-        result.close();
-        this.releaseConnections();
-        return obj;
-    }
-
     public void updateComponentValue(JSONObject mResult) throws SQLException, NamingException {
         this.initConnections();
         stmt.executeUpdate(
-                "INSERT INTO `FRS`.`component_value_buffer_table` (meta_data, process_id, timestamp) VALUES ('" + mResult.getJSONArray("components").toString() + "', " + mResult.getInt("process_id") + ", "
+                "INSERT INTO `component_value_buffer_table` (meta_data, process_id, timestamp) VALUES ('" + mResult.getJSONArray("components").toString() + "', " + mResult.getInt("process_id") + ", "
                 + mResult.getString("stamp_time") + ")");
         this.releaseConnections();
     }
@@ -437,48 +366,34 @@ public class SystemDatabaseHandler {
         return jsonarray;
     }
 
-    public void saveFaultDiagnoseProcedure(int componetID, String series, String faultType, String faultDesc,
-            String diagnoseProcedureInfo, String solution) throws NamingException, SQLException {
+    public JSONObject getUser(String username) throws NamingException, SQLException {
         this.initConnections();
-        stmt.executeUpdate(
-                "INSERT INTO `FRS`.`fault_diagnose_buffer_table` (diagnose_procedure, fault_desc, fault_type, component_id, series, solution) VALUES ('"
-                + diagnoseProcedureInfo + "', '" + faultDesc + "', '" + faultType + "', " + componetID + ", '"
-                + series + "', '" + solution + "')");
-        this.releaseConnections();
-    }
-
-    public JSONArray getFaultProcedureInfos() throws NamingException, SQLException {
-        this.initConnections();
-        ResultSet result = stmt.executeQuery("SELECT * FROM fault_diagnose_buffer_table");
-        JSONArray jsonarray = new JSONArray();
+        ResultSet result = stmt.executeQuery("SELECT * FROM `user_table` WHERE `username` = '" + username + "'");
+        JSONObject obj = new JSONObject();
         while (result.next()) {
-            JSONObject obj = new JSONObject();
-            obj.put("fault_id", result.getInt(1));
-            obj.put("diagnose_procedure", result.getString(2));
-            obj.put("fault_desc", result.getString(3));
-            obj.put("fault_type", result.getString(4));
-            obj.put("component_id", result.getInt(5));
-            obj.put("series", result.getString(6));
-            obj.put("solution", result.getString(7));
-            obj.put("insert_date", result.getTimestamp(8));
-            jsonarray.put(obj);
+            obj.put("userid", result.getInt(1));
+            obj.put("username", result.getString(2));
+            obj.put("password", result.getString(3));
+            obj.put("email", result.getString(4));
+            obj.put("level", result.getString(5));
+            obj.put("insert_date", result.getTimestamp(6));
         }
         result.close();
         this.releaseConnections();
-        return jsonarray;
+        return obj;
     }
 
     public JSONObject resetDatabase() throws SQLException, NamingException {
         this.initConnections();
-        stmt.executeUpdate("UPDATE `FRS`.`component_table` SET `status` = 'active'");
-        stmt.executeUpdate("UPDATE `FRS`.`sub_system_table` SET `status` = 'active'");
-        stmt.executeUpdate("UPDATE `FRS`.`function_table` SET `status` = 'active'");
-        stmt.executeUpdate("UPDATE `FRS`.`sub_function_table` SET `status` = 'active'");
-        stmt.executeUpdate("UPDATE `FRS`.`main_function_table` SET `status` = 'active'");
-        stmt.executeUpdate("UPDATE `FRS`.`requirement_table` SET `status` = 'active'");
-        stmt.executeUpdate("TRUNCATE `FRS`.`fault_table`");
-        // stmt.executeUpdate("TRUNCATE `FRS`.`component_value_buffer_table`");
-        stmt.executeUpdate("TRUNCATE `FRS`.`fault_diagnose_buffer_table`");
+        stmt.executeUpdate("UPDATE `component_table` SET `status` = 'active'");
+        stmt.executeUpdate("UPDATE `sub_system_table` SET `status` = 'active'");
+        stmt.executeUpdate("UPDATE `function_table` SET `status` = 'active'");
+        stmt.executeUpdate("UPDATE `sub_function_table` SET `status` = 'active'");
+        stmt.executeUpdate("UPDATE `main_function_table` SET `status` = 'active'");
+        stmt.executeUpdate("UPDATE `requirement_table` SET `status` = 'active'");
+        stmt.executeUpdate("TRUNCATE `fault_table`");
+        // stmt.executeUpdate("TRUNCATE `component_value_buffer_table`");
+        stmt.executeUpdate("TRUNCATE `fault_diagnose_buffer_table`");
         this.releaseConnections();
         JSONObject obj = new JSONObject();
         obj.put("result", "success");
