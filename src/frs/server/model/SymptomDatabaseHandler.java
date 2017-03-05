@@ -44,7 +44,7 @@ public class SymptomDatabaseHandler {
             obj.put("symptom_id", result.getInt(1));
             obj.put("subsystem_id", result.getInt(2));
             obj.put("subsystem_name", result.getString(3));
-            obj.put("component_id", result.getInt(4));
+            obj.put("parameter", result.getString(4));
             obj.put("result", result.getString(5));
             jsonarray.put(obj);
         }

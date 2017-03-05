@@ -325,40 +325,45 @@ public class SystemDatabaseHandler {
         this.releaseConnections();
     }
 
-    public void updateComponentValue(JSONObject mResult) throws SQLException, NamingException {
+    public void updateRuntimeData(JSONObject mResult) throws SQLException, NamingException {
         this.initConnections();
         stmt.executeUpdate(
-                "INSERT INTO `component_value_buffer_table` (meta_data, process_id, timestamp) VALUES ('" + mResult.getJSONArray("components").toString() + "', " + mResult.getInt("process_id") + ", "
+                "INSERT INTO `runtime_data` (meta_data, task_id, function_id, timestamp) VALUES ('"
+                + mResult.getJSONArray("components").toString() + "', "
+                + mResult.getInt("task_id") + ", "
+                + mResult.getInt("function_id") + ", "
                 + mResult.getString("stamp_time") + ")");
         this.releaseConnections();
     }
 
-    public JSONObject getLastComponentValue() throws NamingException, SQLException {
+    public JSONObject getLastRuntimeData() throws NamingException, SQLException {
         this.initConnections();
-        ResultSet result = stmt.executeQuery("SELECT * FROM `component_value_buffer_table` ORDER BY id DESC LIMIT 1");
+        ResultSet result = stmt.executeQuery("SELECT * FROM `runtime_data` ORDER BY id DESC LIMIT 1");
         JSONObject obj = new JSONObject();
         while (result.next()) {
             obj.put("id", result.getLong(1));
             obj.put("components", new JSONArray(result.getString(2)));
-            obj.put("process_id", result.getInt(3));
-            obj.put("stamp_time", result.getString(4));
+            obj.put("task_id", result.getInt(3));
+            obj.put("function_id", result.getInt(4));
+            obj.put("stamp_time", result.getString(5));
         }
         result.close();
         this.releaseConnections();
         return obj;
     }
 
-    public JSONArray getComponentValue() throws NamingException, SQLException {
+    public JSONArray getRuntimeData() throws NamingException, SQLException {
         this.initConnections();
         ResultSet result = stmt
-                .executeQuery("SELECT * FROM `component_value_buffer_table` ORDER BY id DESC LIMIT 7200");
+                .executeQuery("SELECT * FROM `runtime_data` ORDER BY id DESC LIMIT 7200");
         JSONArray jsonarray = new JSONArray();
         while (result.next()) {
             JSONObject obj = new JSONObject();
             obj.put("id", result.getLong(1));
             obj.put("components", new JSONArray(result.getString(2)));
-            obj.put("process_id", result.getInt(3));
-            obj.put("stamp_time", result.getString(4));
+            obj.put("task_id", result.getInt(3));
+            obj.put("function_id", result.getInt(4));
+            obj.put("stamp_time", result.getString(5));
             jsonarray.put(obj);
         }
         result.close();
@@ -392,7 +397,7 @@ public class SystemDatabaseHandler {
         stmt.executeUpdate("UPDATE `main_function_table` SET `status` = 'active'");
         stmt.executeUpdate("UPDATE `requirement_table` SET `status` = 'active'");
         stmt.executeUpdate("TRUNCATE `fault_table`");
-        // stmt.executeUpdate("TRUNCATE `component_value_buffer_table`");
+        // stmt.executeUpdate("TRUNCATE `runtime_data`");
         stmt.executeUpdate("TRUNCATE `fault_diagnose_buffer_table`");
         this.releaseConnections();
         JSONObject obj = new JSONObject();

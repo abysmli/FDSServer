@@ -62,7 +62,9 @@ public class FDSSimulatorRouter {
 	public Response reportFault(@FormParam("fault_data") String faultdata) throws JSONException, SQLException, NamingException {
 		JSONObject mFaultData = new JSONObject(faultdata);
                 System.out.println(mFaultData);
-		JSONObject mResult = faultController.handleFault(mFaultData.getInt("component_id"), mFaultData.getString("series"), mFaultData.getString("fault_type"), mFaultData.getString("fault_desc"));
+		JSONObject mResult = new JSONObject();
+                mResult = faultController.handleFault(mFaultData);
+                System.out.println("\nFollowing Data will sent to Simulator...");
                 System.out.println(mResult);
 		return Response.status(200).entity(mResult.toString()).build();
 	}
@@ -80,14 +82,14 @@ public class FDSSimulatorRouter {
 		return Response.status(200).entity(mResponse.toString()).build();
 	}
 	
-	@Path("/postComponentsValue")
+	@Path("/postRuntimeData")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response postComponentsValue(@FormParam("component_data") String componentData)
+	public Response postRuntimeData(@FormParam("component_data") String componentData)
 			throws JSONException, SQLException, NamingException {
 		JSONObject mResult = new JSONObject(componentData);
-		databaseSystem.updateComponentValue(mResult);
+		databaseSystem.updateRuntimeData(mResult);
 		JSONObject mResponse = new JSONObject();
 		mResponse.put("result", "success");
 		return Response.status(200).entity(mResponse.toString()).build();

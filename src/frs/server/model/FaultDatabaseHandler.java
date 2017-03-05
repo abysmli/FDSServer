@@ -12,9 +12,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -55,13 +52,15 @@ public class FaultDatabaseHandler {
             obj.put("symptom_desc", result.getString(5));
             obj.put("available_functions", result.getString(6));
             obj.put("reconf_command", result.getString(7));
-            obj.put("fault_effect", result.getString(8));
-            obj.put("fault_location", result.getString(9));
-            obj.put("fault_message", result.getString(10));
-            obj.put("check_status", result.getString(11));
-            obj.put("equipment_id", result.getString(12));
-            obj.put("occured_at", result.getTimestamp(13));
-            obj.put("update_at", result.getTimestamp(14));
+            obj.put("fault_parameter", result.getString(8));
+            obj.put("fault_value", result.getString(9));
+            obj.put("fault_effect", result.getString(10));
+            obj.put("fault_location", result.getString(11));
+            obj.put("fault_message", result.getString(12));
+            obj.put("check_status", result.getString(13));
+            obj.put("equipment_id", result.getString(14));
+            obj.put("occured_at", result.getTimestamp(15));
+            obj.put("update_at", result.getTimestamp(16));
             jsonarray.put(obj);
         }
         result.close();
@@ -71,20 +70,23 @@ public class FaultDatabaseHandler {
 
     public void saveFaultKnowledge(JSONObject mMainObj) throws SQLException, NamingException {
         this.initConnections();
+        System.out.println("\nGenerated Fault Knowledge: ");
+        System.out.println(mMainObj.toString());
         stmt.executeUpdate(
-                "INSERT INTO `fault_knowledge` (`fault_id`, `fault_no`, `fault_name`, `symptom_id`, `symptom_desc`, `available_functions`, `reconf_command`, `fault_effect`, `fault_location`, `fault_message`, `check_status`, `equipment_id`, `occured_at`) VALUES (NULL, '"
+                "INSERT INTO `fault_knowledge` (`fault_no`, `fault_name`, `symptom_id`, `symptom_desc`, `available_functions`, `reconf_command`, `fault_parameter`, `fault_value`, `fault_effect`, `fault_location`, `fault_message`, `check_status`, `equipment_id`, `occured_at`) VALUES ('"
                 + mMainObj.getInt("fault_no") + "', '"
                 + mMainObj.getString("fault_name") + "', '"
                 + mMainObj.getInt("symptom_id") + "', '"
                 + mMainObj.getString("symptom_desc") + "', '"
-                + mMainObj.getJSONObject("available_functions") + "', '"
-                + mMainObj.getJSONObject("reconf_command") + "', '"
+                + mMainObj.getJSONObject("available_functions").toString() + "', '"
+                + mMainObj.getJSONObject("reconf_command").toString() + "', '"
+                + mMainObj.getString("fault_parameter") + "', '"
+                + mMainObj.getString("fault_value") + "', '"
                 + mMainObj.getString("fault_effect") + "', '"
                 + mMainObj.getString("fault_location") + "', '"
                 + mMainObj.getString("fault_message") + "', '"
                 + mMainObj.getString("check_status") + "', '"
-                + mMainObj.getString("equipment_id") + "', '"
-                + mMainObj.getString("occured_at") + "', '"
+                + mMainObj.getString("equipment_id")
                 + "', CURRENT_TIMESTAMP)");
         this.releaseConnections();
     }

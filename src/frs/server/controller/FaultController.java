@@ -1,10 +1,7 @@
 package frs.server.controller;
 
 import frs.server.model.FaultDatabaseHandler;
-import java.util.Date;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,209 +13,152 @@ import org.json.JSONObject;
 
 import frs.server.model.SymptomDatabaseHandler;
 import frs.server.model.SystemDatabaseHandler;
+import frs.server.reasoner.FaultLocalization;
+import frs.server.reasoner.FunctionAnalysis;
+import frs.server.reasoner.ReconfCommandGenerator;
 
 /**
  * @author Li, Yuan Project: FDSServer
  */
-
 public class FaultController {
 
-	private final SymptomDatabaseHandler databaseSymptom = new SymptomDatabaseHandler();
-	private final FaultDatabaseHandler databaseFault = new FaultDatabaseHandler();
-        private final SystemDatabaseHandler databaseSystem = new SystemDatabaseHandler();
-        
-	int step = 1;
-	JSONArray DiagnoseProcedureInfo = new JSONArray();
+    private final SymptomDatabaseHandler databaseSymptom = new SymptomDatabaseHandler();
+    private final FaultDatabaseHandler databaseFault = new FaultDatabaseHandler();
+    private final SystemDatabaseHandler databaseSystem = new SystemDatabaseHandler();
+    private final FaultLocalization faultLocalization = new FaultLocalization();
+    private final FunctionAnalysis functionAnalysis = new FunctionAnalysis();
+    private final ReconfCommandGenerator reconfCommandGenerator = new ReconfCommandGenerator();
 
-	public JSONObject handleFault(int mComponetID, String mSeries, String fault_type, String fault_desc)
-			throws SQLException, NamingException {
-		JSONObject FaultObj = new JSONObject();
-		generateFaultDiagnoseInfo(step++, mSeries, "Scanning Abfuellanlage...", "A fault is found");
-            switch (fault_type) {
-                case "known":
-                    FaultObj = handleKnownFault(mComponetID, mSeries);
-                    if (!FaultObj.toString().equals("{}")) {
-                        generateFaultDiagnoseInfo(step++, mSeries, "Check wether the fault is known ...",
-                                "This fault is marked as known.");
-                        generateFaultDiagnoseInfo(step++, mSeries, "Loading the reconfiguration solutions from Database ...",
-                                "Solution -> Deactive Mainfunction " + FaultObj.getJSONObject("execute_command").getJSONArray("mainfunction_ids")
-                                        .toString());
-                    } else {
-                        generateFaultDiagnoseInfo(step++, mSeries, "Check wether the fault is known ...",
-                                "This fault is marked as known in Anlage, but not be recorded in database! Now the solution will be regenerated! ");
-                        FaultObj = handleUnknownFault(mComponetID, mSeries, fault_type, fault_desc);
-                        generateFaultDiagnoseInfo(step++, mSeries, "Generating reconfiguration solutions ...",
-                                "Solution -> Deactive Mainfunction " + FaultObj.getJSONObject("execute_command")
-                                        .getJSONArray("mainfunction_ids").toString());
-                    }
-                    break;
-                case "unknown":
-                    generateFaultDiagnoseInfo(step++, mSeries, "Check wether the fault is known ...",
-                            "This fault is marked as unknown.");
-                    FaultObj = handleKnownFault(mComponetID, mSeries);
-                    if (!FaultObj.toString().equals("{}")) {
-                        generateFaultDiagnoseInfo(step++, mSeries,
-                                "Scanning Database to check wether the fault was solved before ...",
-                                "This fault has already been solved before.");
-                        generateFaultDiagnoseInfo(step++, mSeries, "Loading the reconfiguration solutions from Database ...",
-                                "Solution -> Deactive Mainfunction " + FaultObj.getJSONObject("execute_command").getJSONArray("mainfunction_ids")
-                                        .toString());
-                    } else {
-                        generateFaultDiagnoseInfo(step++, mSeries,
-                                "Scanning Database to check wether the fault was solved before ...",
-                                "This fault was never happend before.");
-                        FaultObj = handleUnknownFault(mComponetID, mSeries, fault_type, fault_desc);
-                        generateFaultDiagnoseInfo(step++, mSeries, "Generating reconfiguration solutions ...",
-                                "Solution -> Deactive Mainfunction " + FaultObj.getJSONObject("execute_command")
-                                        .getJSONArray("mainfunction_ids").toString());
-                    }
-                    break;
-                case "defect":
-                    generateFaultDiagnoseInfo(step++, mSeries, "Check wether the fault is known ...",
-                            "This fault is marked as defect.");
-                    FaultObj = handleKnownFault(mComponetID, mSeries);
-                    if (!FaultObj.toString().equals("{}")) {
-                        generateFaultDiagnoseInfo(step++, mSeries,
-                                "Scanning Database to check wether the fault was solved before ...",
-                                "This fault has already been solved before.");
-                        generateFaultDiagnoseInfo(step++, mSeries, "Loading the reconfiguration solutions from Database ...",
-                                "Solution -> Deactive Mainfunction " + FaultObj.getJSONObject("execute_command").getJSONArray("mainfunction_ids")
-                                        .toString());
-                    } else {
-                        generateFaultDiagnoseInfo(step++, mSeries,
-                                "Scanning Database to check wether the fault was solved before ...",
-                                "This fault was never happend before.");
-                        FaultObj = handleUnknownFault(mComponetID, mSeries, fault_type, fault_desc);
-                        generateFaultDiagnoseInfo(step++, mSeries, "Generating reconfiguration solutions ...",
-                                "Solution -> Deactive Mainfunction " + FaultObj.getJSONObject("execute_command")
-                                        .getJSONArray("mainfunction_ids").toString());
-                    }
-                    break;
-                case "shift":
-                    generateFaultDiagnoseInfo(step++, mSeries, "Check wether the fault is known ...",
-                            "This fault is marked as shift.");
-                    FaultObj = handleKnownFault(mComponetID, mSeries);
-                    if (!FaultObj.toString().equals("{}")) {
-                        generateFaultDiagnoseInfo(step++, mSeries,
-                                "Scanning Database to check wether the fault was solved before ...",
-                                "This fault has already been solved before.");
-                        generateFaultDiagnoseInfo(step++, mSeries, "Loading the reconfiguration solutions from Database ...",
-                                "Solution -> Deactive Mainfunction " + FaultObj.getJSONObject("execute_command").getJSONArray("mainfunction_ids")
-                                        .toString());
-                    } else {
-                        generateFaultDiagnoseInfo(step++, mSeries,
-                                "Scanning Database to check wether the fault was solved before ...",
-                                "This fault was never happend before.");
-                        FaultObj = handleUnknownFault(mComponetID, mSeries, fault_type, fault_desc);
-                        generateFaultDiagnoseInfo(step++, mSeries, "Generating reconfiguration solutions ...",
-                                "Solution -> Deactive Mainfunction " + FaultObj.getJSONObject("execute_command")
-                                        .getJSONArray("mainfunction_ids").toString());
-                    }
-                    break;
-                default:
-                    break;
+    JSONArray DiagnoseProcedureInfo = new JSONArray();
+
+    public JSONObject handleFault(JSONObject mFaultObj)
+            throws SQLException, NamingException {
+        // {"fault_effect":"Fault Effect:","fault_value":"0","fault_name":"Heizung Defekt","fault_message":"Fault Message:","fault_type":"known","fault_location":"2","equipment_id":"a100111"}
+        String faultEffect = mFaultObj.getString("fault_effect");
+        String faultName = mFaultObj.getString("fault_name");
+        String faultMessage = mFaultObj.getString("fault_message");
+        String faultParam = mFaultObj.getString("fault_parameter");
+        String faultValue = mFaultObj.getString("fault_value");
+        String faultType = mFaultObj.getString("fault_type");
+        String faultLocation = mFaultObj.getString("fault_location");
+        String equipmentID = mFaultObj.getString("equipment_id");
+        boolean knownFaultFlag = false;
+        JSONArray faultObjs = databaseFault.getFaultKnowledge();
+        JSONObject resultObj = new JSONObject();
+        for (int i = 0; i < faultObjs.length(); i++) {
+            if (faultObjs.getJSONObject(i).getString("fault_location").equals(faultLocation)) {
+                knownFaultFlag = true;
+                System.out.println("Known Fault detected!");
+                System.out.println("\nFollowing Data will generated from Database: ");
+                resultObj = faultObjs.getJSONObject(i);
+                JSONObject reconfCommand = new JSONObject(resultObj.getString("reconf_command"));
+                JSONObject availableFunctions = new JSONObject(resultObj.getString("available_functions"));
+                resultObj.put("reconf_command", reconfCommand);
+                resultObj.put("available_functions", availableFunctions);
+                System.out.println(resultObj.toString());
             }
-		databaseFault.saveFaultDiagnoseProcedure(mComponetID, mSeries, fault_type, fault_desc, DiagnoseProcedureInfo.toString(), FaultObj.getJSONObject("execute_command").toString());
-		return FaultObj;
-	}
+        }
+        if (knownFaultFlag) {
+            return resultObj;
+        } else {
+            return this.handleUnknownFault(faultLocation, faultType, faultParam, faultValue, equipmentID, faultEffect, faultName, faultMessage);
+        }
+    }
 
-	private JSONObject handleKnownFault(int mComponetID, String mSeries) throws SQLException, NamingException {
-		return databaseFault.getFaultInfobyComponent(mComponetID);
-	}
+    private JSONObject handleUnknownFault(String faultLocation, String faultType, String faultParam, String faultValue, String equipmentID, String faultEffect, String faultName, String faultMessage) throws SQLException, NamingException {
+        JSONObject resultObj = new JSONObject();
+        
+        System.out.println("Unknown Fault detected!");
+        System.out.println("\n\n\nNow goto Fault Localization process...");
+        JSONObject mFaultLocation = faultLocalization.getFaultLocation(faultLocation, faultType, faultParam, faultValue, equipmentID);
+        
+        System.out.println("\n\n\nNow goto Function Analysis process...");
+        JSONObject mAvailableFunction = functionAnalysis.analysis(mFaultLocation.getString("fault_location"));
+        
+        System.out.println("\n\n\nNow goto Reconfiguration Commands Generation process...");
+        JSONObject mReconfiguration = reconfCommandGenerator.generate(mAvailableFunction);
+        
+        System.out.println("\n\n\nNow generate Result and save the result to Database...");
+        resultObj.put("fault_no", 0);
+        resultObj.put("fault_name", faultName);
+        resultObj.put("symptom_id", mFaultLocation.getInt("symptom_id"));
+        resultObj.put("symptom_desc", mFaultLocation.getString("symptom_desc"));
+        resultObj.put("available_functions", mAvailableFunction);
+        resultObj.put("reconf_command", mReconfiguration);
+        resultObj.put("fault_effect", faultEffect);
+        resultObj.put("fault_parameter", faultParam);
+        resultObj.put("fault_value", faultValue);
+        resultObj.put("fault_location", faultLocation);
+        resultObj.put("fault_message", "-");
+        resultObj.put("check_status", "-");
+        resultObj.put("equipment_id", "-");
+        resultObj.put("occured_at", (new java.util.Date()).toString());
+        databaseFault.saveFaultKnowledge(resultObj);
+        
+        System.out.println("\n\n\nNow send the Result back to Simulator...");
+        return resultObj;
+    }
 
-	public JSONObject handleUnknownFault(int mComponentID, String mSeries, String fault_type, String fault_desc)
-			throws SQLException, NamingException, JSONException {
-		JSONObject mMainObj = new JSONObject();
-		JSONObject mExecutionObj = new JSONObject();
-		JSONArray mSubsystemIDs = getSubsystemIDbyComponent(mComponentID);
-		JSONArray mFunctionIDs = getFunctionIDbyComponent(mComponentID);
-		JSONArray mSubfunctionIDs = getSubfunctionIDbyFunction(mFunctionIDs);
-		JSONArray mMainfunctionIDs = getMainfunctionIDbySubfunction(mSubfunctionIDs);
-		mExecutionObj.put("subsystem_ids", mSubsystemIDs);
-		mExecutionObj.put("function_ids", mFunctionIDs);
-		mExecutionObj.put("subfunction_ids", mSubfunctionIDs);
-		mExecutionObj.put("mainfunction_ids", mMainfunctionIDs);
+    private JSONArray getMainfunctionIDbySubfunction(JSONArray mSubfunctionIDs) throws SQLException, NamingException {
+        List<Integer> mMainfunctionID = databaseSystem.getMainfunctionIDbySubfunction(mSubfunctionIDs);
+        Iterator<Integer> mMainfunctionIterator = mMainfunctionID.iterator();
+        JSONArray mMainfunctionArray = new JSONArray();
 
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Date date = new Date();
+        while (mMainfunctionIterator.hasNext()) {
+            mMainfunctionArray.put(mMainfunctionIterator.next());
+        }
+        return mMainfunctionArray;
+    }
 
-		mMainObj.put("component_id", mComponentID);
-		mMainObj.put("fault_type", fault_type);
-		mMainObj.put("fault_desc", fault_desc);
-		mMainObj.put("execute_command", mExecutionObj);
-		mMainObj.put("insert_date", dateFormat.format(date));
-		databaseFault.saveFaultKnowledge(mMainObj);
+    private JSONArray getSubfunctionIDbyFunction(JSONArray mFunctionIDs) throws SQLException, NamingException {
+        List<Integer> mSubfunctionID = databaseSystem.getSubfunctionIDbyFunction(mFunctionIDs);
+        Iterator<Integer> mSubfunctionIterator = mSubfunctionID.iterator();
+        JSONArray mSubfunctionArray = new JSONArray();
 
-		generateFaultDiagnoseInfo(step++, mSeries,
-				"Scanning [Deployment Matrix] to obtain [Deployment] relationed Components ...",
-				"Component IDs: " + mSubsystemIDs.toString());
-		generateFaultDiagnoseInfo(step++, mSeries, "Scanning [Components Model] to obtain relationed Subsystems ...",
-				"Subsystem IDs: " + mSubsystemIDs.toString());
-		generateFaultDiagnoseInfo(step++, mSeries, "Scanning [Requirments Model] to obtain relationed Functions ...",
-				"Function IDs: " + mSubsystemIDs.toString());
-		generateFaultDiagnoseInfo(step++, mSeries, "Scanning [Functions Model] to obtain relationed Mainfunctions ...",
-				"Mainfunction IDs: " + mSubsystemIDs.toString());
-		return mMainObj;
-	}
+        while (mSubfunctionIterator.hasNext()) {
+            mSubfunctionArray.put(mSubfunctionIterator.next());
+        }
+        return mSubfunctionArray;
+    }
 
-	private JSONArray getMainfunctionIDbySubfunction(JSONArray mSubfunctionIDs) throws SQLException, NamingException {
-		List<Integer> mMainfunctionID = databaseSystem.getMainfunctionIDbySubfunction(mSubfunctionIDs);
-		Iterator<Integer> mMainfunctionIterator = mMainfunctionID.iterator();
-		JSONArray mMainfunctionArray = new JSONArray();
+    private JSONArray getFunctionIDbyComponent(int mComponentID) throws SQLException, NamingException {
+        List<Integer> mFunctionsID = databaseSystem.getFunctionIDbyComponent(mComponentID);
+        Iterator<Integer> mFunctionsIterator = mFunctionsID.iterator();
+        JSONArray mFunctionArray = new JSONArray();
 
-		while (mMainfunctionIterator.hasNext()) {
-			mMainfunctionArray.put(mMainfunctionIterator.next());
-		}
-		return mMainfunctionArray;
-	}
+        while (mFunctionsIterator.hasNext()) {
+            mFunctionArray.put(mFunctionsIterator.next());
+        }
+        return mFunctionArray;
+    }
 
-	private JSONArray getSubfunctionIDbyFunction(JSONArray mFunctionIDs) throws SQLException, NamingException {
-		List<Integer> mSubfunctionID = databaseSystem.getSubfunctionIDbyFunction(mFunctionIDs);
-		Iterator<Integer> mSubfunctionIterator = mSubfunctionID.iterator();
-		JSONArray mSubfunctionArray = new JSONArray();
+    private JSONArray getSubsystemIDbyComponent(int mComponentID) throws SQLException, NamingException {
+        List<Integer> mSubsystemID = databaseSystem.getSubsystemIDbyComponent(mComponentID);
+        Iterator<Integer> mSubsystemIterator = mSubsystemID.iterator();
+        JSONArray mSubsystemArray = new JSONArray();
 
-		while (mSubfunctionIterator.hasNext()) {
-			mSubfunctionArray.put(mSubfunctionIterator.next());
-		}
-		return mSubfunctionArray;
-	}
+        while (mSubsystemIterator.hasNext()) {
+            mSubsystemArray.put(mSubsystemIterator.next());
+        }
+        return mSubsystemArray;
+    }
 
-	private JSONArray getFunctionIDbyComponent(int mComponentID) throws SQLException, NamingException {
-		List<Integer> mFunctionsID = databaseSystem.getFunctionIDbyComponent(mComponentID);
-		Iterator<Integer> mFunctionsIterator = mFunctionsID.iterator();
-		JSONArray mFunctionArray = new JSONArray();
+    public void updateStatus(JSONObject mResult) throws JSONException, NamingException, SQLException {
+        databaseSystem.updateComponents(mResult.getInt("component"));
+        databaseSystem.updateFunctions(mResult.getJSONArray("functions"));
+        databaseSystem.updateSubsystems(mResult.getJSONArray("subsystems"));
+        databaseSystem.updateSubfunctions(mResult.getJSONArray("subfunctions"));
+        databaseSystem.updateMainfunctions(mResult.getJSONArray("mainfunctions"));
+    }
 
-		while (mFunctionsIterator.hasNext()) {
-			mFunctionArray.put(mFunctionsIterator.next());
-		}
-		return mFunctionArray;
-	}
+    private void generateFaultDiagnoseInfo(int step, String mPosition, String mDo, String mResult) {
+        JSONObject DiagnoseStepInfo = new JSONObject();
+        DiagnoseStepInfo.put("step", step);
+        DiagnoseStepInfo.put("Position", mPosition);
+        DiagnoseStepInfo.put("Do", mDo);
+        DiagnoseStepInfo.put("Result", mResult);
+        DiagnoseProcedureInfo.put(DiagnoseStepInfo);
+    }
 
-	private JSONArray getSubsystemIDbyComponent(int mComponentID) throws SQLException, NamingException {
-		List<Integer> mSubsystemID = databaseSystem.getSubsystemIDbyComponent(mComponentID);
-		Iterator<Integer> mSubsystemIterator = mSubsystemID.iterator();
-		JSONArray mSubsystemArray = new JSONArray();
-
-		while (mSubsystemIterator.hasNext()) {
-			mSubsystemArray.put(mSubsystemIterator.next());
-		}
-		return mSubsystemArray;
-	}
-
-	public void updateStatus(JSONObject mResult) throws JSONException, NamingException, SQLException {
-		databaseSystem.updateComponents(mResult.getInt("component"));
-		databaseSystem.updateFunctions(mResult.getJSONArray("functions"));
-		databaseSystem.updateSubsystems(mResult.getJSONArray("subsystems"));
-		databaseSystem.updateSubfunctions(mResult.getJSONArray("subfunctions"));
-		databaseSystem.updateMainfunctions(mResult.getJSONArray("mainfunctions"));
-	}
-
-	private void generateFaultDiagnoseInfo(int step, String mPosition, String mDo, String mResult) {
-		JSONObject DiagnoseStepInfo = new JSONObject();
-		DiagnoseStepInfo.put("step", step);
-		DiagnoseStepInfo.put("Position", mPosition);
-		DiagnoseStepInfo.put("Do", mDo);
-		DiagnoseStepInfo.put("Result", mResult);
-		DiagnoseProcedureInfo.put(DiagnoseStepInfo);
-	}
+    
 }

@@ -60,23 +60,7 @@ public class FRSGUIRouter {
 		return Response.status(200).entity(components.toString()).build();
 	}
 	
-	@Path("/getLastComponentValue")
-	@GET
-	@Produces("application/json;charset=utf-8")
-	public Response getLastComponentValue() throws JSONException, NamingException, SQLException {
-		JSONObject lastComponentValue = databaseSystem.getLastComponentValue();
-		return Response.status(200).entity(lastComponentValue.toString()).build();
-	}
-	
-	@Path("/getComponentValue")
-	@GET
-	@Produces("application/json;charset=utf-8")
-	public Response getComponentValue() throws JSONException, NamingException, SQLException {
-		JSONArray componentValue = databaseSystem.getComponentValue();
-		return Response.status(200).entity(componentValue.toString()).build();
-	}
-	
-	@Path("/getSubsystems")
+		@Path("/getSubsystems")
 	@GET
 	@Produces("application/json;charset=utf-8")
 	public Response getSubsystems() throws JSONException, NamingException, SQLException {
@@ -146,6 +130,22 @@ public class FRSGUIRouter {
 	public Response getFaultProcedureInfos() throws JSONException, NamingException, SQLException {
 		JSONArray faultprocedures = databaseFault.getFaultProcedureInfos();
 		return Response.status(200).entity(faultprocedures.toString()).build();
+	}
+        
+        @Path("/getLastRuntimeData")
+	@GET
+	@Produces("application/json;charset=utf-8")
+	public Response getLastRuntimeData() throws JSONException, NamingException, SQLException {
+		JSONObject lastComponentValue = databaseSystem.getLastRuntimeData();
+		return Response.status(200).entity(lastComponentValue.toString()).build();
+	}
+	
+	@Path("/getRuntimeData")
+	@GET
+	@Produces("application/json;charset=utf-8")
+	public Response getRuntimeData() throws JSONException, NamingException, SQLException {
+		JSONArray componentValue = databaseSystem.getRuntimeData();
+		return Response.status(200).entity(componentValue.toString()).build();
 	}
 	
 }
