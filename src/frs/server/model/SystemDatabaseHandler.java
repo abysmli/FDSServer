@@ -267,15 +267,6 @@ public class SystemDatabaseHandler {
         return MainfunctionIDs;
     }
 
-    public void saveFault(JSONObject mMainObj) throws SQLException, NamingException {
-        this.initConnections();
-        stmt.executeUpdate(
-                "INSERT INTO `fault_table` (`fault_id`, `component_id`, `fault_type`, `fault_desc`, `execute_command`, `insert_date`, `update_date`) VALUES (NULL, '"
-                + mMainObj.getInt("component_id") + "', '" + mMainObj.getString("fault_type") + "', '"
-                + mMainObj.getString("fault_desc") + "', '" + mMainObj.getJSONObject("execute_command")
-                + "', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)");
-        this.releaseConnections();
-    }
 
     public void updateComponents(int componentId) throws NamingException, SQLException {
         this.initConnections();
@@ -324,7 +315,57 @@ public class SystemDatabaseHandler {
         }
         this.releaseConnections();
     }
+    
+    public JSONArray getReconfigurations() throws NamingException, SQLException {
+        this.initConnections();
+        ResultSet result = stmt.executeQuery("SELECT * FROM reconfiguration_table");
+        JSONArray jsonarray = new JSONArray();
+        while (result.next()) {
+            JSONObject obj = new JSONObject();
+            obj.put("reconf_id", result.getInt(1));
+            obj.put("command", result.getString(2));
+            obj.put("restart", result.getString(3));
+            obj.put("reconf_function", result.getString(4));
+            obj.put("reconf_systemchange", result.getString(5));
+            obj.put("special_code", result.getString(6));
+            jsonarray.put(obj);
+        }
+        result.close();
+        this.releaseConnections();
+        return jsonarray;
+    }
+    
+    public void saveReconfigurations(JSONObject mMainObj) throws SQLException, NamingException {
+        this.initConnections();
+        stmt.executeUpdate(
+                "INSERT INTO `reconfiguration_table` (`command`, `restart`, `reconf_function`, `reconf_systemchange`, `special_code`) VALUES ('"
+                + mMainObj.getJSONArray("command").toString() + "', '"
+                + mMainObj.getString("restart").toString() + "', '"
+                + mMainObj.getJSONObject("reconf_function").toString() + "', '"
+                + mMainObj.getJSONObject("reconf_systemchange").toString() + "', '"
+                + mMainObj.getString("special_code").toString() + "')");
+        this.releaseConnections();
+    }
 
+    public JSONArray getTasks() throws SQLException, NamingException {
+        this.initConnections();
+        ResultSet result = stmt.executeQuery("SELECT * FROM task_table");
+        JSONArray jsonarray = new JSONArray();
+        while (result.next()) {
+            JSONObject obj = new JSONObject();
+            obj.put("task_id", result.getInt(1));
+            obj.put("task_name", result.getString(2));
+            obj.put("required_resource", result.getString(3));
+            obj.put("required_mainfunction", result.getString(4));
+            obj.put("insert_date", result.getTimestamp(5));
+            obj.put("update_date", result.getTimestamp(6));
+            jsonarray.put(obj);
+        }
+        result.close();
+        this.releaseConnections();
+        return jsonarray;
+    }
+    
     public void updateRuntimeData(JSONObject mResult) throws SQLException, NamingException {
         this.initConnections();
         stmt.executeUpdate(
@@ -354,8 +395,7 @@ public class SystemDatabaseHandler {
 
     public JSONArray getRuntimeData() throws NamingException, SQLException {
         this.initConnections();
-        ResultSet result = stmt
-                .executeQuery("SELECT * FROM `runtime_data` ORDER BY id DESC LIMIT 7200");
+        ResultSet result = stmt.executeQuery("SELECT * FROM `runtime_data` ORDER BY id DESC LIMIT 7200");
         JSONArray jsonarray = new JSONArray();
         while (result.next()) {
             JSONObject obj = new JSONObject();
@@ -371,23 +411,6 @@ public class SystemDatabaseHandler {
         return jsonarray;
     }
 
-    public JSONObject getUser(String username) throws NamingException, SQLException {
-        this.initConnections();
-        ResultSet result = stmt.executeQuery("SELECT * FROM `user_table` WHERE `username` = '" + username + "'");
-        JSONObject obj = new JSONObject();
-        while (result.next()) {
-            obj.put("userid", result.getInt(1));
-            obj.put("username", result.getString(2));
-            obj.put("password", result.getString(3));
-            obj.put("email", result.getString(4));
-            obj.put("level", result.getString(5));
-            obj.put("insert_date", result.getTimestamp(6));
-        }
-        result.close();
-        this.releaseConnections();
-        return obj;
-    }
-
     public JSONObject resetDatabase() throws SQLException, NamingException {
         this.initConnections();
         stmt.executeUpdate("UPDATE `component_table` SET `status` = 'active'");
@@ -397,7 +420,7 @@ public class SystemDatabaseHandler {
         stmt.executeUpdate("UPDATE `main_function_table` SET `status` = 'active'");
         stmt.executeUpdate("UPDATE `requirement_table` SET `status` = 'active'");
         stmt.executeUpdate("TRUNCATE `fault_table`");
-        // stmt.executeUpdate("TRUNCATE `runtime_data`");
+        stmt.executeUpdate("TRUNCATE `runtime_data`");
         stmt.executeUpdate("TRUNCATE `fault_diagnose_buffer_table`");
         this.releaseConnections();
         JSONObject obj = new JSONObject();

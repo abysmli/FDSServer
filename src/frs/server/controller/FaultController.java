@@ -42,6 +42,7 @@ public class FaultController {
         String faultType = mFaultObj.getString("fault_type");
         String faultLocation = mFaultObj.getString("fault_location");
         String equipmentID = mFaultObj.getString("equipment_id");
+        JSONArray mTaskList = mFaultObj.getJSONArray("task_list");
         boolean knownFaultFlag = false;
         JSONArray faultObjs = databaseFault.getFaultKnowledge();
         JSONObject resultObj = new JSONObject();
@@ -61,11 +62,11 @@ public class FaultController {
         if (knownFaultFlag) {
             return resultObj;
         } else {
-            return this.handleUnknownFault(faultLocation, faultType, faultParam, faultValue, equipmentID, faultEffect, faultName, faultMessage);
+            return this.handleUnknownFault(faultLocation, faultType, faultParam, faultValue, equipmentID, faultEffect, faultName, faultMessage, mTaskList);
         }
     }
 
-    private JSONObject handleUnknownFault(String faultLocation, String faultType, String faultParam, String faultValue, String equipmentID, String faultEffect, String faultName, String faultMessage) throws SQLException, NamingException {
+    private JSONObject handleUnknownFault(String faultLocation, String faultType, String faultParam, String faultValue, String equipmentID, String faultEffect, String faultName, String faultMessage, JSONArray mTaskList) throws SQLException, NamingException {
         JSONObject resultObj = new JSONObject();
         
         System.out.println("Unknown Fault detected!");
@@ -76,7 +77,9 @@ public class FaultController {
         JSONObject mAvailableFunction = functionAnalysis.analysis(mFaultLocation.getString("fault_location"));
         
         System.out.println("\n\n\nNow goto Reconfiguration Commands Generation process...");
-        JSONObject mReconfiguration = reconfCommandGenerator.generate(mAvailableFunction);
+        JSONObject mReconfiguration = reconfCommandGenerator.generate(mAvailableFunction, mTaskList);
+        System.out.println("\nSave new generated Reconfiguration Commands in Database...");
+        databaseSystem.saveReconfigurations(mReconfiguration);
         
         System.out.println("\n\n\nNow generate Result and save the result to Database...");
         resultObj.put("fault_no", 0);
@@ -93,6 +96,8 @@ public class FaultController {
         resultObj.put("check_status", "-");
         resultObj.put("equipment_id", "-");
         resultObj.put("occured_at", (new java.util.Date()).toString());
+        System.out.println("\nGenerated Fault Knowledge: ");
+        System.out.println(resultObj.toString());
         databaseFault.saveFaultKnowledge(resultObj);
         
         System.out.println("\n\n\nNow send the Result back to Simulator...");

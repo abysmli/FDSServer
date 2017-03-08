@@ -70,8 +70,6 @@ public class FaultDatabaseHandler {
 
     public void saveFaultKnowledge(JSONObject mMainObj) throws SQLException, NamingException {
         this.initConnections();
-        System.out.println("\nGenerated Fault Knowledge: ");
-        System.out.println(mMainObj.toString());
         stmt.executeUpdate(
                 "INSERT INTO `fault_knowledge` (`fault_no`, `fault_name`, `symptom_id`, `symptom_desc`, `available_functions`, `reconf_command`, `fault_parameter`, `fault_value`, `fault_effect`, `fault_location`, `fault_message`, `check_status`, `equipment_id`, `occured_at`) VALUES ('"
                 + mMainObj.getInt("fault_no") + "', '"
