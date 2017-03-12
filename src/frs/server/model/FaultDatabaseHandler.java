@@ -150,35 +150,4 @@ public class FaultDatabaseHandler {
         this.releaseConnections();
         return obj;
     }
-
-    public JSONArray getFaultProcedureInfos() throws NamingException, SQLException {
-        this.initConnections();
-        ResultSet result = stmt.executeQuery("SELECT * FROM fault_diagnose_buffer_table");
-        JSONArray jsonarray = new JSONArray();
-        while (result.next()) {
-            JSONObject obj = new JSONObject();
-            obj.put("fault_id", result.getInt(1));
-            obj.put("diagnose_procedure", result.getString(2));
-            obj.put("fault_desc", result.getString(3));
-            obj.put("fault_type", result.getString(4));
-            obj.put("component_id", result.getInt(5));
-            obj.put("series", result.getString(6));
-            obj.put("solution", result.getString(7));
-            obj.put("insert_date", result.getTimestamp(8));
-            jsonarray.put(obj);
-        }
-        result.close();
-        this.releaseConnections();
-        return jsonarray;
-    }
-
-    public void saveFaultDiagnoseProcedure(int componetID, String series, String faultType, String faultDesc,
-            String diagnoseProcedureInfo, String solution) throws NamingException, SQLException {
-        this.initConnections();
-        stmt.executeUpdate(
-                "INSERT INTO `fault_diagnose_buffer_table` (diagnose_procedure, fault_desc, fault_type, component_id, series, solution) VALUES ('"
-                + diagnoseProcedureInfo + "', '" + faultDesc + "', '" + faultType + "', " + componetID + ", '"
-                + series + "', '" + solution + "')");
-        this.releaseConnections();
-    }
 }

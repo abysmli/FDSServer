@@ -25,21 +25,25 @@ public class FaultController {
     private final SymptomDatabaseHandler databaseSymptom = new SymptomDatabaseHandler();
     private final FaultDatabaseHandler databaseFault = new FaultDatabaseHandler();
     private final SystemDatabaseHandler databaseSystem = new SystemDatabaseHandler();
-    private final FaultLocalization faultLocalization = new FaultLocalization();
-    private final FunctionAnalysis functionAnalysis = new FunctionAnalysis();
-    private final ReconfCommandGenerator reconfCommandGenerator = new ReconfCommandGenerator();
-
+    
+    public final AnalysisProcedureGenerator analysisProcedure = new AnalysisProcedureGenerator();
+    private final FaultLocalization faultLocalization = new FaultLocalization(analysisProcedure);
+    private final FunctionAnalysis functionAnalysis = new FunctionAnalysis(analysisProcedure);
+    private final ReconfCommandGenerator reconfCommandGenerator = new ReconfCommandGenerator(analysisProcedure);
+    
     JSONArray DiagnoseProcedureInfo = new JSONArray();
-
+    
     public JSONObject handleFault(JSONObject mFaultObj)
             throws SQLException, NamingException {
-        // {"fault_effect":"Fault Effect:","fault_value":"0","fault_name":"Heizung Defekt","fault_message":"Fault Message:","fault_type":"known","fault_location":"2","equipment_id":"a100111"}
+        
+        analysisProcedure.faultInfo.setFaultObject(mFaultObj);
         String faultEffect = mFaultObj.getString("fault_effect");
         String faultName = mFaultObj.getString("fault_name");
         String faultMessage = mFaultObj.getString("fault_message");
         String faultParam = mFaultObj.getString("fault_parameter");
         String faultValue = mFaultObj.getString("fault_value");
         String faultType = mFaultObj.getString("fault_type");
+        analysisProcedure.setFaultType(faultType);
         String faultLocation = mFaultObj.getString("fault_location");
         String equipmentID = mFaultObj.getString("equipment_id");
         JSONArray mTaskList = mFaultObj.getJSONArray("task_list");
@@ -49,14 +53,15 @@ public class FaultController {
         for (int i = 0; i < faultObjs.length(); i++) {
             if (faultObjs.getJSONObject(i).getString("fault_location").equals(faultLocation)) {
                 knownFaultFlag = true;
-                System.out.println("Known Fault detected!");
-                System.out.println("\nFollowing Data will generated from Database: ");
+                analysisProcedure.faultInfo.setFaultInfo("Known Fault detected!");
+                analysisProcedure.write("Known Fault detected!");
+                analysisProcedure.write("\nFollowing Data will generated from Database: ");
                 resultObj = faultObjs.getJSONObject(i);
                 JSONObject reconfCommand = new JSONObject(resultObj.getString("reconf_command"));
                 JSONObject availableFunctions = new JSONObject(resultObj.getString("available_functions"));
                 resultObj.put("reconf_command", reconfCommand);
                 resultObj.put("available_functions", availableFunctions);
-                System.out.println(resultObj.toString());
+                analysisProcedure.write(resultObj.toString());
             }
         }
         if (knownFaultFlag) {
@@ -68,20 +73,20 @@ public class FaultController {
 
     private JSONObject handleUnknownFault(String faultLocation, String faultType, String faultParam, String faultValue, String equipmentID, String faultEffect, String faultName, String faultMessage, JSONArray mTaskList) throws SQLException, NamingException {
         JSONObject resultObj = new JSONObject();
-        
-        System.out.println("Unknown Fault detected!");
-        System.out.println("\n\n\nNow goto Fault Localization process...");
+        analysisProcedure.faultInfo.setFaultInfo("Unknown Fault detected!");
+        analysisProcedure.write("Unknown Fault detected!");
+        analysisProcedure.write("\n\n\nNow goto Fault Localization process...");
         JSONObject mFaultLocation = faultLocalization.getFaultLocation(faultLocation, faultType, faultParam, faultValue, equipmentID);
         
-        System.out.println("\n\n\nNow goto Function Analysis process...");
+        analysisProcedure.write("\n\n\nNow goto Function Analysis process...");
         JSONObject mAvailableFunction = functionAnalysis.analysis(mFaultLocation.getString("fault_location"));
         
-        System.out.println("\n\n\nNow goto Reconfiguration Commands Generation process...");
+        analysisProcedure.write("\n\n\nNow goto Reconfiguration Commands Generation process...");
         JSONObject mReconfiguration = reconfCommandGenerator.generate(mAvailableFunction, mTaskList);
-        System.out.println("\nSave new generated Reconfiguration Commands in Database...");
+        analysisProcedure.write("\nSave new generated Reconfiguration Commands in Database...");
         databaseSystem.saveReconfigurations(mReconfiguration);
         
-        System.out.println("\n\n\nNow generate Result and save the result to Database...");
+        analysisProcedure.write("\n\n\nNow generate Result and save the result to Database...");
         resultObj.put("fault_no", 0);
         resultObj.put("fault_name", faultName);
         resultObj.put("symptom_id", mFaultLocation.getInt("symptom_id"));
@@ -96,11 +101,13 @@ public class FaultController {
         resultObj.put("check_status", "-");
         resultObj.put("equipment_id", "-");
         resultObj.put("occured_at", (new java.util.Date()).toString());
-        System.out.println("\nGenerated Fault Knowledge: ");
-        System.out.println(resultObj.toString());
+        analysisProcedure.write("\nGenerated Fault Knowledge: ");
+        analysisProcedure.write(resultObj.toString());
+        analysisProcedure.setResult(resultObj);
         databaseFault.saveFaultKnowledge(resultObj);
         
-        System.out.println("\n\n\nNow send the Result back to Simulator...");
+        analysisProcedure.write("\n\n\nNow send the Result back to Simulator...");
+        analysisProcedure.save();
         return resultObj;
     }
 

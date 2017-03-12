@@ -5,6 +5,7 @@
  */
 package frs.server.reasoner;
 
+import frs.server.controller.AnalysisProcedureGenerator;
 import frs.server.model.SystemDatabaseHandler;
 import java.sql.SQLException;
 import javax.naming.NamingException;
@@ -18,6 +19,12 @@ import org.json.JSONObject;
 public class ReconfCommandGenerator {
 
     private final SystemDatabaseHandler databaseSystem = new SystemDatabaseHandler();
+    private final AnalysisProcedureGenerator analysisProcedure;
+
+    public ReconfCommandGenerator(AnalysisProcedureGenerator analysisProcedure) {
+        this.analysisProcedure = analysisProcedure;
+    }
+    
 
     public JSONObject generate(JSONObject mAvailableFunction, JSONArray mTaskList) throws SQLException, NamingException {
         JSONObject resultObj = new JSONObject();
@@ -32,7 +39,7 @@ public class ReconfCommandGenerator {
     }
 
     private JSONArray ReconfigurationCommandGenerator(JSONObject mAvailableFunction) {
-        System.out.println("\nStep 1: Generating Reconfiguration Command...");
+        analysisProcedure.write("\nStep 1: Generating Reconfiguration Command...");
         JSONArray mMainFunctions = mAvailableFunction.getJSONArray("main_functions");
         JSONArray mSubFunctions = mAvailableFunction.getJSONArray("sub_functions");
         JSONArray mBasicFunctions = mAvailableFunction.getJSONArray("basic_functions");
@@ -73,32 +80,36 @@ public class ReconfCommandGenerator {
         availableCommand.put(mainFunctionCommand);
         availableCommand.put(subFunctionCommand);
         availableCommand.put(basicFunctionCommand);
-        System.out.println("Reconfiguration Command: ");
-        System.out.println("mainfunction command: " + mMainFunctionsCommand);
-        System.out.println("subfunction Command: " + mSubFunctionsCommand);
-        System.out.println("basicfunction Command: " + mBasciFunctionsCommand);
-        System.out.println(availableCommand.toString());
+        analysisProcedure.write("Reconfiguration Command: ");
+        analysisProcedure.write("mainfunction command: " + mMainFunctionsCommand);
+        analysisProcedure.write("subfunction Command: " + mSubFunctionsCommand);
+        analysisProcedure.write("basicfunction Command: " + mBasciFunctionsCommand);
+        analysisProcedure.write(availableCommand.toString());
+        analysisProcedure.reconfigurationInfo.setReconfigurationsCommand(availableCommand);
         return availableCommand;
     }
 
     private JSONObject RedundanzAnalyse() {
-        System.out.println("\nStep 2: Redundanz Analysis");
+        analysisProcedure.write("\nStep 2: Redundanz Analysis");
         JSONObject obj = new JSONObject();
         obj.put("function", "F5 - F7");
         obj.put("component", "C3 - C27");
-        System.out.println(obj.toString());
+        analysisProcedure.write(obj.toString());
+        analysisProcedure.reconfigurationInfo.setRedundanzAnalysis(obj);
         return obj;
     }
 
     private String CheckRestartRequired(JSONObject mAvailableFunction) {
-        System.out.println("\nStep 3: Check whether Restart required...");
-        System.out.println("true");
+        analysisProcedure.write("\nStep 3: Check whether Restart required...");
+        analysisProcedure.write("true");
+        analysisProcedure.reconfigurationInfo.setRestart("true");
         return "true";
     }
 
     private JSONObject ReconfFunctionGenerator(JSONObject mAvailableFunction) {
-        System.out.println("\nStep 4: Generating Reconfiguration Functions...");
-        System.out.println(mAvailableFunction.toString());
+        analysisProcedure.write("\nStep 4: Generating Reconfiguration Functions...");
+        analysisProcedure.write(mAvailableFunction.toString());
+        analysisProcedure.reconfigurationInfo.setReconfigurationFunctions(mAvailableFunction);
         return mAvailableFunction;
     }
 
@@ -120,65 +131,93 @@ public class ReconfCommandGenerator {
             functionFlags.put(obj);
         }
         reconfSystemChanged.put("functions_flag", functionFlags);
-        System.out.println("\nStep 5: Generating Command for System Change...");
-        System.out.println(functionFlags.toString());
+        analysisProcedure.write("\nStep 5: Generating Command for System Change...");
+        analysisProcedure.write(functionFlags.toString());
+        analysisProcedure.reconfigurationInfo.setReconfigurationSystemchange(functionFlags);
         TaskAnalysis(reconfSystemChanged, mTaskList);
         return reconfSystemChanged;
     }
 
     private JSONObject TaskAnalysis(JSONObject reconfSystemChanged, JSONArray mTaskList) throws SQLException, NamingException {
-        System.out.println("\nStep 6: Tasks Analysis...");
+        analysisProcedure.write("\nStep 6: Tasks Analysis...");
         databaseSystem.getTasks();
+        JSONArray mTaskAnalysis = new JSONArray();
         for (int i = 0; i < mTaskList.length(); i++) {
             JSONObject taskObj = mTaskList.getJSONObject(i);
-            System.out.println("\nTask Nr.: " + taskObj.getString("task_nr"));
-            System.out.println("Task ID: " + taskObj.getString("task_id"));
-            System.out.println("Task Name: " + taskObj.getString("task_name"));
+            analysisProcedure.write("\nTask Nr.: " + taskObj.getString("task_nr"));
+            analysisProcedure.write("Task ID: " + taskObj.getString("task_id"));
+            analysisProcedure.write("Task Name: " + taskObj.getString("task_name"));
             // todo: realize the logic
+            
+            JSONObject mTaskAnalysisObj = new JSONObject();
+            mTaskAnalysisObj.put("task_nr", String.valueOf(i));
+            mTaskAnalysisObj.put("task_id", taskObj.getString("task_id"));
+            mTaskAnalysisObj.put("task_name", taskObj.getString("task_name"));
             switch (taskObj.getString("task_id")) {
                 case "1":
-                    System.out.println("Task '" + taskObj.getString("task_name") + "' fulfilled the resource rule: Minimum 8L Water in Tank 102");
-                    System.out.println("Task '" + taskObj.getString("task_name") + "' fulfilled the function rule: MF1 = true, MF3 = true, MF4 = true");
+                    mTaskAnalysisObj.put("resource_rule", "Minimum 8L Water in Tank 102");
+                    mTaskAnalysisObj.put("resource_rule_result", "fulfilled");
+                    mTaskAnalysisObj.put("function_rule", "MF1 = true, MF3 = true, MF4 = true");
+                    mTaskAnalysisObj.put("function_rule_result", "fulfilled");
+                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the resource rule: Minimum 8L Water in Tank 102");
+                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the function rule: MF1 = true, MF3 = true, MF4 = true");
                     mTaskList.getJSONObject(i).put("status", "normal");
                     break;
                 case "2":
-                    System.out.println("Task '" + taskObj.getString("task_name") + "' fulfilled the resource rule: Minimum 5L Water in Tank 102");
-                    System.out.println("Task '" + taskObj.getString("task_name") + "' fulfilled the function rule: MF3 = true");
+                    mTaskAnalysisObj.put("resource_rule", "Minimum 5L Water in Tank 102");
+                    mTaskAnalysisObj.put("resource_rule_result", "fulfilled");
+                    mTaskAnalysisObj.put("function_rule", "MF3 = true");
+                    mTaskAnalysisObj.put("function_rule_result", "fulfilled");
+                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the resource rule: Minimum 5L Water in Tank 102");
+                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the function rule: MF3 = true");
                     mTaskList.getJSONObject(i).put("status", "normal");
                     break;
                 case "3":
-                    System.out.println("Task '" + taskObj.getString("task_name") + "' fulfilled the resource rule: Minimum 8L Water in Tank 102");
-                    System.out.println("Task '" + taskObj.getString("task_name") + "' fulfilled the function rule: MF2 = true");
+                    mTaskAnalysisObj.put("resource_rule", "Minimum 8L Water in Tank 102");
+                    mTaskAnalysisObj.put("resource_rule_result", "fulfilled");
+                    mTaskAnalysisObj.put("function_rule", "MF2 = true");
+                    mTaskAnalysisObj.put("function_rule_result", "fulfilled");
+                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the resource rule: Minimum 8L Water in Tank 102");
+                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the function rule: MF2 = true");
                     mTaskList.getJSONObject(i).put("status", "normal");
                     break;
                 case "4":
-                    System.out.println("Task '" + taskObj.getString("task_name") + "' fulfilled the resource rule: Minimum 3L Water in Tank 102");
-                    System.out.println("Task '" + taskObj.getString("task_name") + "' fulfilled the function rule: MF1 = true, MF3 = true");
+                    mTaskAnalysisObj.put("resource_rule", "Minimum 3L Water in Tank 102");
+                    mTaskAnalysisObj.put("resource_rule_result", "fulfilled");
+                    mTaskAnalysisObj.put("function_rule", "MF1 = true, MF3 = true");
+                    mTaskAnalysisObj.put("function_rule_result", "fulfilled");
+                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the resource rule: Minimum 3L Water in Tank 102");
+                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the function rule: MF1 = true, MF3 = true");
                     mTaskList.getJSONObject(i).put("status", "normal");
                     break;
                 default:
                     break;
             }
+            mTaskAnalysis.put(mTaskAnalysisObj);
         }
-        System.out.println("\nTask List after analysis: ");
-        System.out.println(mTaskList.toString());
+        analysisProcedure.write("\nTask List after analysis: ");
+        analysisProcedure.write(mTaskList.toString());
+        analysisProcedure.reconfigurationInfo.setTaskAnalysis(mTaskAnalysis);
+        analysisProcedure.reconfigurationInfo.setTaskList(mTaskList);
         reconfSystemChanged.put("task_list", mTaskList);
         return reconfSystemChanged;
     }
 
     private String SpecialCodeGenerator(JSONObject mAvailableFunction) {
-        System.out.println("\nStep 7: Generating Special Code...");
-        System.out.println("Special Code: 'temp = temperaturDisplay2.getTemperatur()'");
+        analysisProcedure.write("\nStep 7: Generating Special Code...");
+        analysisProcedure.write("Special Code: temp = temperaturDisplay2.getTemperatur()");
+        analysisProcedure.reconfigurationInfo.setSpecialCode("temp = temperaturDisplay2.getTemperatur()");
         return "temp = temperaturDisplay2.getTemperatur()";
     }
 
     private JSONObject PersonalData() {
-        System.out.println("\nStep 8: Get Personal Data");
+        analysisProcedure.write("\nStep 8: Get Personal Data");
         JSONObject obj = new JSONObject();
         obj.put("General Techniker", "Wang, Huiqiang +49 123 4567 899");
         obj.put("Wartungsdienst", "Hui, Wangqiang +49 321 2233 899");
         obj.put("Expert", "Qiang, Wangqiang +49 333 4567 888");
-        System.out.println(obj.toString());
+        analysisProcedure.write(obj.toString());
+        analysisProcedure.reconfigurationInfo.setPersonalData(obj);
         return obj;
     }
 }

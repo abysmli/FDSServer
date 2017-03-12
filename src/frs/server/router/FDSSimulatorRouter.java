@@ -47,13 +47,6 @@ public class FDSSimulatorRouter {
 		mStatus.put("status", "running");
 		return Response.status(200).entity(mStatus.toString()).build();
 	}
-
-        @Path("/test")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getTest() throws JSONException, SQLException, NamingException {		
-		return Response.status(200).entity(databaseSymptom.getSymptomPumping().toString()).build();
-	}
         
 	@Path("/reportFault")
 	@POST
@@ -61,11 +54,8 @@ public class FDSSimulatorRouter {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Response reportFault(@FormParam("fault_data") String faultdata) throws JSONException, SQLException, NamingException {
 		JSONObject mFaultData = new JSONObject(faultdata);
-                System.out.println(mFaultData);
 		JSONObject mResult = new JSONObject();
                 mResult = faultController.handleFault(mFaultData);
-                System.out.println("\nFollowing Data will sent to Simulator...");
-                System.out.println(mResult);
 		return Response.status(200).entity(mResult.toString()).build();
 	}
 

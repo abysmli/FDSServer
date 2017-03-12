@@ -5,6 +5,7 @@
  */
 package frs.server.reasoner;
 
+import frs.server.controller.AnalysisProcedureGenerator;
 import frs.server.model.FaultDatabaseHandler;
 import frs.server.model.SymptomDatabaseHandler;
 import frs.server.model.SystemDatabaseHandler;
@@ -22,46 +23,53 @@ public class FaultLocalization {
     private final SymptomDatabaseHandler databaseSymptom = new SymptomDatabaseHandler();
     private final FaultDatabaseHandler databaseFault = new FaultDatabaseHandler();
     private final SystemDatabaseHandler databaseSystem = new SystemDatabaseHandler();
+    private final AnalysisProcedureGenerator analysisProcedure;
+
+    public FaultLocalization(AnalysisProcedureGenerator analysisProcedure) {
+        this.analysisProcedure = analysisProcedure;
+    }
     
     public JSONObject getFaultLocation(String faultLocation, String faultType, String faultParam, String faultValue, String equipmentID) throws SQLException, NamingException {
         JSONObject resultObj = new JSONObject();
         int mFaultSubsystem = 0;
         JSONArray symptomSubsystem = databaseSymptom.getSymptomSubsystem();
-        System.out.println("\nSymtom Analysis Step1: Compare Symptom Subsystem");
+        analysisProcedure.write("\nSymtom Analysis Step1: Compare Symptom Subsystem");
         for (int i=0; i<symptomSubsystem.length(); i++) {
             if (symptomSubsystem.getJSONObject(i).getString("parameter").equals(faultParam)) {
                 mFaultSubsystem = symptomSubsystem.getJSONObject(i).getInt("subsystem_id");
             }
         }
-        System.out.println("Found Fault Parameter: " + faultParam);
+        analysisProcedure.faultLocalizationInfo.setFaultParameter(faultParam);
+        analysisProcedure.write("Found Fault Parameter: " + faultParam);
         switch (mFaultSubsystem) {
             case 1:
-                System.out.println("Found: Fault in Subsystem Heating...");
-                System.out.println("\nSymtom Analysis Step2: Compare Symptom Subsystem Heating");
+                analysisProcedure.write("Found: Fault in Subsystem Heating...");
+                analysisProcedure.write("\nSymtom Analysis Step2: Compare Symptom Subsystem Heating");
                 resultObj = symptomHeatingAnalysis(faultLocation, faultType, faultValue, equipmentID);
-                System.out.println(resultObj.toString());
+                analysisProcedure.write(resultObj.toString());
                 break;
             case 2:
-                System.out.println("Found: Fault in Subsystem Inflow...");
-                System.out.println("\nSymtom Analysis Step2: Compare Symptom Subsystem Inflow");
+                analysisProcedure.write("Found: Fault in Subsystem Inflow...");
+                analysisProcedure.write("\nSymtom Analysis Step2: Compare Symptom Subsystem Inflow");
                 resultObj = symptomInflowAnalysis(faultLocation, faultType, faultValue, equipmentID);
-                System.out.println(resultObj.toString());
+                analysisProcedure.write(resultObj.toString());
                 break;
             case 3:
-                System.out.println("Found: Fault in Subsystem Pumping...");
-                System.out.println("\nSymtom Analysis Step2: Compare Symptom Subsystem Pumping");
+                analysisProcedure.write("Found: Fault in Subsystem Pumping...");
+                analysisProcedure.write("\nSymtom Analysis Step2: Compare Symptom Subsystem Pumping");
                 resultObj = symptomPumpingAnalysis(faultLocation, faultType, faultValue, equipmentID);
-                System.out.println(resultObj.toString());
+                analysisProcedure.write(resultObj.toString());
                 break;
             case 4:
-                System.out.println("Found: Fault in Subsystem Airpressure...");
-                System.out.println("\nSymtom Analysis Step2: Compare Symptom Subsystem Airpressure");
+                analysisProcedure.write("Found: Fault in Subsystem Airpressure...");
+                analysisProcedure.write("\nSymtom Analysis Step2: Compare Symptom Subsystem Airpressure");
                 resultObj = symptomAirpressureAnalysis(faultLocation, faultType, faultValue, equipmentID);
-                System.out.println(resultObj.toString());
+                analysisProcedure.write(resultObj.toString());
                 break;
             default:
                 break;
         }
+        analysisProcedure.faultLocalizationInfo.setSymptom(resultObj);
         return resultObj;
     }
 
@@ -77,7 +85,7 @@ public class FaultLocalization {
             resultObj.put("symptom_desc", "Temperatur changerate less than 0.5 Degress/s");
             resultObj.put("fault_location", "3");
         }
-        System.out.println("Compare Symptom Subsystem Heating Result dump: ");
+        analysisProcedure.write("Compare Symptom Subsystem Heating Result dump: ");
         return resultObj;
     }
 

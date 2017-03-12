@@ -124,11 +124,11 @@ public class FRSGUIRouter {
 		return Response.status(200).entity(mainfunctionsubfunctionrel.toString()).build();
 	}
 
-	@Path("/getFaultProcedureInfos")
+	@Path("/getAnalysisProcedure")
 	@GET
 	@Produces("application/json;charset=utf-8")
-	public Response getFaultProcedureInfos() throws JSONException, NamingException, SQLException {
-		JSONArray faultprocedures = databaseFault.getFaultProcedureInfos();
+	public Response getAnalysisProcedure() throws JSONException, NamingException, SQLException {
+		JSONArray faultprocedures = databaseSystem.getAnalysisProcedure();
 		return Response.status(200).entity(faultprocedures.toString()).build();
 	}
         

@@ -42,6 +42,43 @@ public class SystemDatabaseHandler {
         this.connection.close();
     }
 
+    public JSONArray getAnalysisProcedure() throws NamingException, SQLException {
+        this.initConnections();
+        ResultSet result = stmt.executeQuery("SELECT * FROM analysis_procedure_buffer");
+        JSONArray jsonarray = new JSONArray();
+        while (result.next()) {
+            JSONObject obj = new JSONObject();
+            obj.put("procedure_id", result.getInt(1));
+            obj.put("fault_type", result.getString(2));
+            obj.put("fault_info", result.getString(3));
+            obj.put("fault_localization_info", result.getString(4));
+            obj.put("function_analysis_info", result.getString(5));
+            obj.put("reconfiguration_info", result.getString(6));
+            obj.put("result", result.getString(7));
+            obj.put("dump_info", result.getString(8));
+            obj.put("insert_date", result.getTimestamp(9));
+            obj.put("update_date", result.getTimestamp(10));
+            jsonarray.put(obj);
+        }
+        result.close();
+        this.releaseConnections();
+        return jsonarray;
+    }
+
+    public void saveAnalysisProcedure(JSONObject mAnalysisProcedure) throws NamingException, SQLException {
+        this.initConnections();
+        stmt.executeUpdate(
+                "INSERT INTO `analysis_procedure_buffer` (`procedure_id`, `fault_type`, `fault_info`, `fault_localization_info`, `function_analysis_info`, `reconfiguration_info`, `result`, `dump_info`) VALUES (NULL, '"
+                + mAnalysisProcedure.getString("fault_type") + "', '"
+                + mAnalysisProcedure.getJSONObject("fault_info").toString() + "', '"
+                + mAnalysisProcedure.getJSONObject("fault_localization_info").toString() + "', '"
+                + mAnalysisProcedure.getJSONObject("function_analysis_info").toString() + "', '"
+                + mAnalysisProcedure.getJSONObject("reconfiguration_info").toString() + "', '"
+                + mAnalysisProcedure.getJSONObject("result").toString() + "', '"
+                + mAnalysisProcedure.getJSONArray("dump_info").toString() + "')");
+        this.releaseConnections();
+    }
+
     public JSONArray getComponents() throws SQLException, NamingException {
         this.initConnections();
         ResultSet result = stmt.executeQuery("SELECT * FROM component_table");
@@ -166,8 +203,9 @@ public class SystemDatabaseHandler {
             JSONObject obj = new JSONObject();
             obj.put("subfunction_id", result.getInt(1));
             obj.put("subfunction_desc", result.getString(2));
-            obj.put("status", result.getString(3));
-            obj.put("insert_date", result.getTimestamp(4));
+            obj.put("rule", result.getString(3));
+            obj.put("status", result.getString(4));
+            obj.put("insert_date", result.getTimestamp(5));
             jsonarray.put(obj);
         }
         result.close();
@@ -183,8 +221,9 @@ public class SystemDatabaseHandler {
             JSONObject obj = new JSONObject();
             obj.put("mainfunction_id", result.getInt(1));
             obj.put("mainfunction_desc", result.getString(2));
-            obj.put("status", result.getString(3));
-            obj.put("insert_date", result.getTimestamp(4));
+            obj.put("rule", result.getString(3));
+            obj.put("status", result.getString(4));
+            obj.put("insert_date", result.getTimestamp(5));
             jsonarray.put(obj);
         }
         result.close();
@@ -230,8 +269,6 @@ public class SystemDatabaseHandler {
                 mSubquery += "function_table.function_id = " + mFunctionIDs.getInt(i) + " OR ";
             }
         }
-        System.out.println("SELECT subfunction_function_rel.subfunction_id FROM function_table INNER JOIN subfunction_function_rel ON function_table.function_id = subfunction_function_rel.function_id WHERE "
-                + mSubquery + " GROUP BY subfunction_function_rel.subfunction_id");
         ResultSet result = stmt.executeQuery(
                 "SELECT subfunction_function_rel.subfunction_id FROM function_table INNER JOIN subfunction_function_rel ON function_table.function_id = subfunction_function_rel.function_id WHERE "
                 + mSubquery + " GROUP BY subfunction_function_rel.subfunction_id");
@@ -266,7 +303,6 @@ public class SystemDatabaseHandler {
         this.releaseConnections();
         return MainfunctionIDs;
     }
-
 
     public void updateComponents(int componentId) throws NamingException, SQLException {
         this.initConnections();
@@ -315,7 +351,7 @@ public class SystemDatabaseHandler {
         }
         this.releaseConnections();
     }
-    
+
     public JSONArray getReconfigurations() throws NamingException, SQLException {
         this.initConnections();
         ResultSet result = stmt.executeQuery("SELECT * FROM reconfiguration_table");
@@ -334,7 +370,7 @@ public class SystemDatabaseHandler {
         this.releaseConnections();
         return jsonarray;
     }
-    
+
     public void saveReconfigurations(JSONObject mMainObj) throws SQLException, NamingException {
         this.initConnections();
         stmt.executeUpdate(
@@ -365,7 +401,7 @@ public class SystemDatabaseHandler {
         this.releaseConnections();
         return jsonarray;
     }
-    
+
     public void updateRuntimeData(JSONObject mResult) throws SQLException, NamingException {
         this.initConnections();
         stmt.executeUpdate(
@@ -426,5 +462,56 @@ public class SystemDatabaseHandler {
         JSONObject obj = new JSONObject();
         obj.put("result", "success");
         return obj;
+    }
+
+    public JSONArray getRequirements() throws NamingException, SQLException {
+        this.initConnections();
+        ResultSet result = stmt.executeQuery("SELECT * FROM requirement_table");
+        JSONArray jsonarray = new JSONArray();
+        while (result.next()) {
+            JSONObject obj = new JSONObject();
+            obj.put("requirement_id", result.getInt(1));
+            obj.put("requirement_name", result.getString(2));
+            obj.put("rule", result.getString(3));
+            obj.put("insert_date", result.getTimestamp(4));
+            jsonarray.put(obj);
+        }
+        result.close();
+        this.releaseConnections();
+        return jsonarray;
+    }
+
+    public JSONArray getSubRequirements() throws NamingException, SQLException {
+        this.initConnections();
+        ResultSet result = stmt.executeQuery("SELECT * FROM sub_requirement_table");
+        JSONArray jsonarray = new JSONArray();
+        while (result.next()) {
+            JSONObject obj = new JSONObject();
+            obj.put("sub_requirement_id", result.getInt(1));
+            obj.put("sub_requirement_name", result.getString(2));
+            obj.put("rule", result.getString(3));
+            obj.put("insert_date", result.getTimestamp(4));
+            jsonarray.put(obj);
+        }
+        result.close();
+        this.releaseConnections();
+        return jsonarray;
+    }
+
+    public JSONArray getMainRequirements() throws NamingException, SQLException {
+        this.initConnections();
+        ResultSet result = stmt.executeQuery("SELECT * FROM main_requirement_table");
+        JSONArray jsonarray = new JSONArray();
+        while (result.next()) {
+            JSONObject obj = new JSONObject();
+            obj.put("main_requirement_id", result.getInt(1));
+            obj.put("main_requirement_name", result.getString(2));
+            obj.put("rule", result.getString(3));
+            obj.put("insert_date", result.getTimestamp(4));
+            jsonarray.put(obj);
+        }
+        result.close();
+        this.releaseConnections();
+        return jsonarray;
     }
 }
