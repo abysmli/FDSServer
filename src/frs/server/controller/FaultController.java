@@ -55,13 +55,14 @@ public class FaultController {
                 knownFaultFlag = true;
                 analysisProcedure.faultInfo.setFaultInfo("Known Fault detected!");
                 analysisProcedure.write("Known Fault detected!");
-                analysisProcedure.write("\nFollowing Data will generated from Database: ");
+                System.out.println();
+                analysisProcedure.write("Following Data will generated from Database: ");
                 resultObj = faultObjs.getJSONObject(i);
                 JSONObject reconfCommand = new JSONObject(resultObj.getString("reconf_command"));
                 JSONObject availableFunctions = new JSONObject(resultObj.getString("available_functions"));
                 resultObj.put("reconf_command", reconfCommand);
                 resultObj.put("available_functions", availableFunctions);
-                analysisProcedure.write(resultObj.toString());
+                System.out.println(resultObj.toString());
             }
         }
         if (knownFaultFlag) {
@@ -75,18 +76,23 @@ public class FaultController {
         JSONObject resultObj = new JSONObject();
         analysisProcedure.faultInfo.setFaultInfo("Unknown Fault detected!");
         analysisProcedure.write("Unknown Fault detected!");
-        analysisProcedure.write("\n\n\nNow goto Fault Localization process...");
+        System.out.println("\n\n");
+        analysisProcedure.write("Now goto Fault Localization process...");
         JSONObject mFaultLocation = faultLocalization.getFaultLocation(faultLocation, faultType, faultParam, faultValue, equipmentID);
         
-        analysisProcedure.write("\n\n\nNow goto Function Analysis process...");
+        System.out.println("\n\n");
+        analysisProcedure.write("Now goto Function Analysis process...");
         JSONObject mAvailableFunction = functionAnalysis.analysis(mFaultLocation.getString("fault_location"));
         
-        analysisProcedure.write("\n\n\nNow goto Reconfiguration Commands Generation process...");
+        System.out.println("\n\n");
+        analysisProcedure.write("Now goto Reconfiguration Commands Generation process...");
         JSONObject mReconfiguration = reconfCommandGenerator.generate(mAvailableFunction, mTaskList);
-        analysisProcedure.write("\nSave new generated Reconfiguration Commands in Database...");
+        System.out.println();
+        analysisProcedure.write("Save new generated Reconfiguration Commands in Database...");
         databaseSystem.saveReconfigurations(mReconfiguration);
         
-        analysisProcedure.write("\n\n\nNow generate Result and save the result to Database...");
+        System.out.println("\n\n");
+        analysisProcedure.write("Now generate Result and save the result to Database...");
         resultObj.put("fault_no", 0);
         resultObj.put("fault_name", faultName);
         resultObj.put("symptom_id", mFaultLocation.getInt("symptom_id"));
@@ -101,12 +107,14 @@ public class FaultController {
         resultObj.put("check_status", "-");
         resultObj.put("equipment_id", "-");
         resultObj.put("occured_at", (new java.util.Date()).toString());
-        analysisProcedure.write("\nGenerated Fault Knowledge: ");
-        analysisProcedure.write(resultObj.toString());
+        System.out.println();
+        analysisProcedure.write("Generated Fault Knowledge: ");
+        System.out.println(resultObj.toString());
         analysisProcedure.setResult(resultObj);
         databaseFault.saveFaultKnowledge(resultObj);
         
-        analysisProcedure.write("\n\n\nNow send the Result back to Simulator...");
+        System.out.println("\n\n");
+        analysisProcedure.write("Now send the Result back to Simulator...");
         analysisProcedure.save();
         return resultObj;
     }

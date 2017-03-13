@@ -39,7 +39,8 @@ public class ReconfCommandGenerator {
     }
 
     private JSONArray ReconfigurationCommandGenerator(JSONObject mAvailableFunction) {
-        analysisProcedure.write("\nStep 1: Generating Reconfiguration Command...");
+        System.out.println();
+        analysisProcedure.write("Step 1: Generating Reconfiguration Command...");
         JSONArray mMainFunctions = mAvailableFunction.getJSONArray("main_functions");
         JSONArray mSubFunctions = mAvailableFunction.getJSONArray("sub_functions");
         JSONArray mBasicFunctions = mAvailableFunction.getJSONArray("basic_functions");
@@ -84,31 +85,34 @@ public class ReconfCommandGenerator {
         analysisProcedure.write("mainfunction command: " + mMainFunctionsCommand);
         analysisProcedure.write("subfunction Command: " + mSubFunctionsCommand);
         analysisProcedure.write("basicfunction Command: " + mBasciFunctionsCommand);
-        analysisProcedure.write(availableCommand.toString());
+        System.out.println(availableCommand.toString());
         analysisProcedure.reconfigurationInfo.setReconfigurationsCommand(availableCommand);
         return availableCommand;
     }
 
     private JSONObject RedundanzAnalyse() {
-        analysisProcedure.write("\nStep 2: Redundanz Analysis");
+        System.out.println();
+        analysisProcedure.write("Step 2: Redundanz Analysis");
         JSONObject obj = new JSONObject();
         obj.put("function", "F5 - F7");
         obj.put("component", "C3 - C27");
-        analysisProcedure.write(obj.toString());
+        System.out.println(obj.toString());
         analysisProcedure.reconfigurationInfo.setRedundanzAnalysis(obj);
         return obj;
     }
 
     private String CheckRestartRequired(JSONObject mAvailableFunction) {
-        analysisProcedure.write("\nStep 3: Check whether Restart required...");
+        System.out.println();
+        analysisProcedure.write("Step 3: Check whether Restart required...");
         analysisProcedure.write("true");
         analysisProcedure.reconfigurationInfo.setRestart("true");
         return "true";
     }
 
     private JSONObject ReconfFunctionGenerator(JSONObject mAvailableFunction) {
-        analysisProcedure.write("\nStep 4: Generating Reconfiguration Functions...");
-        analysisProcedure.write(mAvailableFunction.toString());
+        System.out.println();
+        analysisProcedure.write("Step 4: Generating Reconfiguration Functions...");
+        System.out.println(mAvailableFunction.toString());
         analysisProcedure.reconfigurationInfo.setReconfigurationFunctions(mAvailableFunction);
         return mAvailableFunction;
     }
@@ -131,20 +135,23 @@ public class ReconfCommandGenerator {
             functionFlags.put(obj);
         }
         reconfSystemChanged.put("functions_flag", functionFlags);
-        analysisProcedure.write("\nStep 5: Generating Command for System Change...");
-        analysisProcedure.write(functionFlags.toString());
+        System.out.println();
+        analysisProcedure.write("Step 5: Generating Command for System Change...");
+        System.out.println(functionFlags.toString());
         analysisProcedure.reconfigurationInfo.setReconfigurationSystemchange(functionFlags);
         TaskAnalysis(reconfSystemChanged, mTaskList);
         return reconfSystemChanged;
     }
 
     private JSONObject TaskAnalysis(JSONObject reconfSystemChanged, JSONArray mTaskList) throws SQLException, NamingException {
-        analysisProcedure.write("\nStep 6: Tasks Analysis...");
+        System.out.println();
+        analysisProcedure.write("Step 6: Tasks Analysis...");
         databaseSystem.getTasks();
         JSONArray mTaskAnalysis = new JSONArray();
         for (int i = 0; i < mTaskList.length(); i++) {
             JSONObject taskObj = mTaskList.getJSONObject(i);
-            analysisProcedure.write("\nTask Nr.: " + taskObj.getString("task_nr"));
+            System.out.println();
+            analysisProcedure.write("Task Nr.: " + taskObj.getString("task_nr"));
             analysisProcedure.write("Task ID: " + taskObj.getString("task_id"));
             analysisProcedure.write("Task Name: " + taskObj.getString("task_name"));
             // todo: realize the logic
@@ -195,8 +202,9 @@ public class ReconfCommandGenerator {
             }
             mTaskAnalysis.put(mTaskAnalysisObj);
         }
-        analysisProcedure.write("\nTask List after analysis: ");
-        analysisProcedure.write(mTaskList.toString());
+        System.out.println();
+        analysisProcedure.write("Task List after analysis: ");
+        System.out.println(mTaskList.toString());
         analysisProcedure.reconfigurationInfo.setTaskAnalysis(mTaskAnalysis);
         analysisProcedure.reconfigurationInfo.setTaskList(mTaskList);
         reconfSystemChanged.put("task_list", mTaskList);
@@ -204,19 +212,21 @@ public class ReconfCommandGenerator {
     }
 
     private String SpecialCodeGenerator(JSONObject mAvailableFunction) {
-        analysisProcedure.write("\nStep 7: Generating Special Code...");
+        System.out.println();
+        analysisProcedure.write("Step 7: Generating Special Code...");
         analysisProcedure.write("Special Code: temp = temperaturDisplay2.getTemperatur()");
         analysisProcedure.reconfigurationInfo.setSpecialCode("temp = temperaturDisplay2.getTemperatur()");
         return "temp = temperaturDisplay2.getTemperatur()";
     }
 
     private JSONObject PersonalData() {
-        analysisProcedure.write("\nStep 8: Get Personal Data");
+        System.out.println();
+        analysisProcedure.write("Step 8: Get Personal Data");
         JSONObject obj = new JSONObject();
         obj.put("General Techniker", "Wang, Huiqiang +49 123 4567 899");
         obj.put("Wartungsdienst", "Hui, Wangqiang +49 321 2233 899");
         obj.put("Expert", "Qiang, Wangqiang +49 333 4567 888");
-        analysisProcedure.write(obj.toString());
+        System.out.println(obj.toString());
         analysisProcedure.reconfigurationInfo.setPersonalData(obj);
         return obj;
     }

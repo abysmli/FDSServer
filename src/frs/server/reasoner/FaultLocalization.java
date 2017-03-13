@@ -33,7 +33,8 @@ public class FaultLocalization {
         JSONObject resultObj = new JSONObject();
         int mFaultSubsystem = 0;
         JSONArray symptomSubsystem = databaseSymptom.getSymptomSubsystem();
-        analysisProcedure.write("\nSymtom Analysis Step1: Compare Symptom Subsystem");
+        System.out.println();
+        analysisProcedure.write("Symtom Analysis Step1: Compare Symptom Subsystem");
         for (int i=0; i<symptomSubsystem.length(); i++) {
             if (symptomSubsystem.getJSONObject(i).getString("parameter").equals(faultParam)) {
                 mFaultSubsystem = symptomSubsystem.getJSONObject(i).getInt("subsystem_id");
@@ -44,27 +45,31 @@ public class FaultLocalization {
         switch (mFaultSubsystem) {
             case 1:
                 analysisProcedure.write("Found: Fault in Subsystem Heating...");
-                analysisProcedure.write("\nSymtom Analysis Step2: Compare Symptom Subsystem Heating");
+                System.out.println();
+                analysisProcedure.write("Symtom Analysis Step2: Compare Symptom Subsystem Heating");
                 resultObj = symptomHeatingAnalysis(faultLocation, faultType, faultValue, equipmentID);
-                analysisProcedure.write(resultObj.toString());
+                System.out.println(resultObj.toString());
                 break;
             case 2:
                 analysisProcedure.write("Found: Fault in Subsystem Inflow...");
-                analysisProcedure.write("\nSymtom Analysis Step2: Compare Symptom Subsystem Inflow");
+                System.out.println();
+                analysisProcedure.write("Symtom Analysis Step2: Compare Symptom Subsystem Inflow");
                 resultObj = symptomInflowAnalysis(faultLocation, faultType, faultValue, equipmentID);
-                analysisProcedure.write(resultObj.toString());
+                System.out.println(resultObj.toString());
                 break;
             case 3:
                 analysisProcedure.write("Found: Fault in Subsystem Pumping...");
-                analysisProcedure.write("\nSymtom Analysis Step2: Compare Symptom Subsystem Pumping");
+                System.out.println();
+                analysisProcedure.write("Symtom Analysis Step2: Compare Symptom Subsystem Pumping");
                 resultObj = symptomPumpingAnalysis(faultLocation, faultType, faultValue, equipmentID);
-                analysisProcedure.write(resultObj.toString());
+                System.out.println(resultObj.toString());
                 break;
             case 4:
                 analysisProcedure.write("Found: Fault in Subsystem Airpressure...");
-                analysisProcedure.write("\nSymtom Analysis Step2: Compare Symptom Subsystem Airpressure");
+                System.out.println();
+                analysisProcedure.write("Symtom Analysis Step2: Compare Symptom Subsystem Airpressure");
                 resultObj = symptomAirpressureAnalysis(faultLocation, faultType, faultValue, equipmentID);
-                analysisProcedure.write(resultObj.toString());
+                System.out.println(resultObj.toString());
                 break;
             default:
                 break;
