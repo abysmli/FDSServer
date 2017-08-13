@@ -1,37 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE webapp>
 <Context path="/FRS">
-    <Resource
-        name="jdbc/FRS_SystemKnowledge"
-        type="javax.sql.DataSource"
-        maxActive="100" 
-        maxIdle="30" 
-        maxWait="10000"
-        url="jdbc:mysql://localhost:3306/FRS_SystemKnowledge?autoReconnect=true&amp;useSSL=false" 
-        driverClassName="com.mysql.jdbc.Driver" 
-        username="FDS"
-        password="FDS" 
-    />
-    <Resource
-        name="jdbc/FRS_SymptomKnowledge"
-        type="javax.sql.DataSource"
-        maxActive="100" 
-        maxIdle="30" 
-        maxWait="10000"
-        url="jdbc:mysql://localhost:3306/FRS_SymptomKnowledge?autoReconnect=true&amp;useSSL=false" 
-        driverClassName="com.mysql.jdbc.Driver" 
-        username="FDS"
-        password="FDS" 
-    />
-    <Resource
-        name="jdbc/FRS_FaultKnowledge"
-        type="javax.sql.DataSource"
-        maxActive="100" 
-        maxIdle="30" 
-        maxWait="10000"
-        url="jdbc:mysql://localhost:3306/FRS_FaultKnowledge?autoReconnect=true&amp;useSSL=false" 
-        driverClassName="com.mysql.jdbc.Driver" 
-        username="FDS"
-        password="FDS" 
-    />
+  <Resource driverClassName="com.mysql.jdbc.Driver" maxActive="100" maxIdle="30" maxWait="10000" name="jdbc/FRS_SystemKnowledge" password="FDS" type="javax.sql.DataSource" url="jdbc:mysql://localhost:3306/FRS_SystemKnowledge?autoReconnect=true&amp;useSSL=false" username="FDS"/>
+  <Resource driverClassName="com.mysql.jdbc.Driver" maxActive="100" maxIdle="30" maxWait="10000" name="jdbc/FRS_SymptomKnowledge" password="FDS" type="javax.sql.DataSource" url="jdbc:mysql://localhost:3306/FRS_SymptomKnowledge?autoReconnect=true&amp;useSSL=false" username="FDS"/>
+  <Resource driverClassName="com.mysql.jdbc.Driver" maxActive="100" maxIdle="30" maxWait="10000" name="jdbc/FRS_FaultKnowledge" password="FDS" type="javax.sql.DataSource" url="jdbc:mysql://localhost:3306/FRS_FaultKnowledge?autoReconnect=true&amp;useSSL=false" username="FDS"/>
 </Context>
