@@ -28,14 +28,14 @@ public class FaultLocalization {
     public FaultLocalization(AnalysisProcedureGenerator analysisProcedure) {
         this.analysisProcedure = analysisProcedure;
     }
-    
+
     public JSONObject getFaultLocation(String faultLocation, String faultType, String faultParam, String faultValue, String equipmentID) throws SQLException, NamingException {
         JSONObject resultObj = new JSONObject();
         int mFaultSubsystem = 0;
         JSONArray symptomSubsystem = databaseSymptom.getSymptomSubsystem();
         System.out.println();
         analysisProcedure.write("Symtom Analysis Step1: Compare Symptom Subsystem");
-        for (int i=0; i<symptomSubsystem.length(); i++) {
+        for (int i = 0; i < symptomSubsystem.length(); i++) {
             if (symptomSubsystem.getJSONObject(i).getString("parameter").equals(faultParam)) {
                 mFaultSubsystem = symptomSubsystem.getJSONObject(i).getInt("subsystem_id");
             }
@@ -47,29 +47,25 @@ public class FaultLocalization {
                 analysisProcedure.write("Found: Fault in Subsystem Heating...");
                 System.out.println();
                 analysisProcedure.write("Symtom Analysis Step2: Compare Symptom Subsystem Heating");
-                resultObj = symptomHeatingAnalysis(faultLocation, faultType, faultValue, equipmentID);
-                System.out.println(resultObj.toString());
+                resultObj = symptomHeatingAnalysis(faultLocation, faultType, faultParam, faultValue, equipmentID);
                 break;
             case 2:
                 analysisProcedure.write("Found: Fault in Subsystem Inflow...");
                 System.out.println();
                 analysisProcedure.write("Symtom Analysis Step2: Compare Symptom Subsystem Inflow");
-                resultObj = symptomInflowAnalysis(faultLocation, faultType, faultValue, equipmentID);
-                System.out.println(resultObj.toString());
+                resultObj = symptomInflowAnalysis(faultLocation, faultType, faultParam, faultValue, equipmentID);
                 break;
             case 3:
                 analysisProcedure.write("Found: Fault in Subsystem Pumping...");
                 System.out.println();
                 analysisProcedure.write("Symtom Analysis Step2: Compare Symptom Subsystem Pumping");
-                resultObj = symptomPumpingAnalysis(faultLocation, faultType, faultValue, equipmentID);
-                System.out.println(resultObj.toString());
+                resultObj = symptomPumpingAnalysis(faultLocation, faultType, faultParam, faultValue, equipmentID);
                 break;
             case 4:
                 analysisProcedure.write("Found: Fault in Subsystem Airpressure...");
                 System.out.println();
                 analysisProcedure.write("Symtom Analysis Step2: Compare Symptom Subsystem Airpressure");
-                resultObj = symptomAirpressureAnalysis(faultLocation, faultType, faultValue, equipmentID);
-                System.out.println(resultObj.toString());
+                resultObj = symptomAirpressureAnalysis(faultLocation, faultType, faultParam, faultValue, equipmentID);
                 break;
             default:
                 break;
@@ -78,62 +74,220 @@ public class FaultLocalization {
         return resultObj;
     }
 
-    
-    private JSONObject symptomHeatingAnalysis(String faultLocation, String faultType, String faultValue, String equipmentID) {
+    private JSONObject symptomHeatingAnalysis(String faultLocation, String faultType, String faultParam, String faultValue, String equipmentID) throws SQLException, NamingException {
         JSONObject resultObj = new JSONObject();
-        if (faultType.equals("value")) {
-            resultObj.put("symptom_id", 2);
-            resultObj.put("symptom_desc", "Temperatur bigger than 100 Degress");
-            resultObj.put("fault_location", "3");
-        } else if (faultType.equals("changerate")) {
-            resultObj.put("symptom_id", 4);
-            resultObj.put("symptom_desc", "Temperatur changerate less than 0.5 Degress/s");
-            resultObj.put("fault_location", "3");
+        JSONArray mHeatingSymtpom = databaseSymptom.getSymptomHeating();
+        for (int i = 0; i < mHeatingSymtpom.length(); i++) {
+            JSONObject mObj = mHeatingSymtpom.getJSONObject(i);
+            if (faultType.equals("value") && !mObj.getString("parameter_value_oper").isEmpty()) {
+                float valueInSymptom = Float.parseFloat(mObj.getString("parameter_value"));
+                float mFaultValue = Float.parseFloat(faultValue);
+                if (mObj.getString("parameter_value_oper") == "less") {
+                    if (mFaultValue < valueInSymptom) {
+                        resultObj.put("symptom_id", mObj.getInt("symptom_id"));
+                        resultObj.put("symptom_desc", "Temperatur less than" + mObj.getString("parameter_value") + "Degress");
+                        resultObj.put("fault_location", mObj.getString(mObj.getString("component_id")));
+                    }
+                } else if (mObj.getString("parameter_value_oper") == "bigger") {
+                    if (mFaultValue > valueInSymptom) {
+                        resultObj.put("symptom_id", mObj.getInt("symptom_id"));
+                        resultObj.put("symptom_desc", "Temperatur bigger than" + mObj.getString("parameter_value") + "Degress");
+                        resultObj.put("fault_location", mObj.getString(mObj.getString("component_id")));
+                    }
+                } else {
+                    // will not happend in theory
+                }
+            } else if (faultType.equals("changerate") && !mObj.getString("parameter_changerate_oper").isEmpty()) {
+                float valueInSymptom = Float.parseFloat(mObj.getString("parameter_changerate"));
+                float mFaultValue = Float.parseFloat(faultValue);
+                if (mObj.getString("parameter_changerate_oper") == "less") {
+                    if (mFaultValue < valueInSymptom) {
+                        resultObj.put("symptom_id", mObj.getInt("symptom_id"));
+                        resultObj.put("symptom_desc", "Temperatur changerate less than" + mObj.getString("parameter_value") + "s/Degress");
+                        resultObj.put("fault_location", mObj.getString(mObj.getString("component_id")));
+                    }
+                } else if (mObj.getString("parameter_changerate_oper") == "bigger") {
+                    if (mFaultValue > valueInSymptom) {
+                        resultObj.put("symptom_id", mObj.getInt("symptom_id"));
+                        resultObj.put("symptom_desc", "Temperatur changerate bigger than" + mObj.getString("parameter_value") + "s/Degress");
+                        resultObj.put("fault_location", mObj.getString(mObj.getString("component_id")));
+                    }
+                } else {
+                    // will not happend in theory
+                }
+            } else if (faultType.equals("trend")) {
+                // Todo: not implemented
+            } else {
+                resultObj.put("symptom_id", 15);
+                resultObj.put("symptom_desc", "Temperatur Subsystem Defekt");
+                resultObj.put("fault_location", "2");
+            }
         }
         analysisProcedure.write("Compare Symptom Subsystem Heating Result dump: ");
+        System.out.println(resultObj.toString());
         return resultObj;
     }
 
-    private JSONObject symptomAirpressureAnalysis(String faultLocation, String faultType, String faultValue, String equipmentID) {
+    private JSONObject symptomAirpressureAnalysis(String faultLocation, String faultType, String faultParam, String faultValue, String equipmentID) throws SQLException, NamingException {
         JSONObject resultObj = new JSONObject();
-        if (faultType == "value") {
-            resultObj.put("symptom_id", 22);
-            resultObj.put("symptom_desc", "Airpressure bigger than 6 Pa");
-            resultObj.put("fault_location", "3");
-        } else if (faultType == "changerate") {
-            resultObj.put("symptom_id", 22);
-            resultObj.put("symptom_desc", "Airpressure changerate less than 0.5 Pa/s");
-            resultObj.put("fault_location", "3");
+        JSONArray mAirpressureSymtpom = databaseSymptom.getSymptomAirpressure();
+        for (int i = 0; i < mAirpressureSymtpom.length(); i++) {
+            JSONObject mObj = mAirpressureSymtpom.getJSONObject(i);
+            if (faultType.equals("value") && !mObj.getString("parameter_value_oper").isEmpty()) {
+                float valueInSymptom = Float.parseFloat(mObj.getString("parameter_value"));
+                float mFaultValue = Float.parseFloat(faultValue);
+                if (mObj.getString("parameter_value_oper") == "less") {
+                    if (mFaultValue < valueInSymptom) {
+                        resultObj.put("symptom_id", mObj.getInt("symptom_id"));
+                        resultObj.put("symptom_desc", "Temperatur less than" + mObj.getString("parameter_value") + "Degress");
+                        resultObj.put("fault_location", mObj.getString(mObj.getString("component_id")));
+                    }
+                } else if (mObj.getString("parameter_value_oper") == "bigger") {
+                    if (mFaultValue > valueInSymptom) {
+                        resultObj.put("symptom_id", mObj.getInt("symptom_id"));
+                        resultObj.put("symptom_desc", "Temperatur bigger than" + mObj.getString("parameter_value") + "Degress");
+                        resultObj.put("fault_location", mObj.getString(mObj.getString("component_id")));
+                    }
+                } else {
+                    // will not happend in theory
+                }
+            } else if (faultType.equals("changerate") && !mObj.getString("parameter_changerate_oper").isEmpty()) {
+                float valueInSymptom = Float.parseFloat(mObj.getString("parameter_changerate"));
+                float mFaultValue = Float.parseFloat(faultValue);
+                if (mObj.getString("parameter_changerate_oper") == "less") {
+                    if (mFaultValue < valueInSymptom) {
+                        resultObj.put("symptom_id", mObj.getInt("symptom_id"));
+                        resultObj.put("symptom_desc", "Temperatur changerate less than" + mObj.getString("parameter_value") + "s/Degress");
+                        resultObj.put("fault_location", mObj.getString(mObj.getString("component_id")));
+                    }
+                } else if (mObj.getString("parameter_changerate_oper") == "bigger") {
+                    if (mFaultValue > valueInSymptom) {
+                        resultObj.put("symptom_id", mObj.getInt("symptom_id"));
+                        resultObj.put("symptom_desc", "Temperatur changerate bigger than" + mObj.getString("parameter_value") + "s/Degress");
+                        resultObj.put("fault_location", mObj.getString(mObj.getString("component_id")));
+                    }
+                } else {
+                    // will not happend in theory
+                }
+            } else if (faultType.equals("trend")) {
+                // Todo: not implemented
+            } else {
+                resultObj.put("symptom_id", 15);
+                resultObj.put("symptom_desc", "Temperatur Subsystem Defekt");
+                resultObj.put("fault_location", "2");
+            }
         }
+        analysisProcedure.write("Compare Symptom Subsystem Airpressure Result dump: ");
+        System.out.println(resultObj.toString());
         return resultObj;
     }
 
-    private JSONObject symptomPumpingAnalysis(String faultLocation, String faultType, String faultValue, String equipmentID) {
+    private JSONObject symptomPumpingAnalysis(String faultLocation, String faultType, String faultParam, String faultValue, String equipmentID) throws SQLException, NamingException {
         JSONObject resultObj = new JSONObject();
-        if (faultType == "value") {
-            resultObj.put("symptom_id", 15);
-            resultObj.put("symptom_desc", "Water flowrate bigger than 1 L/s");
-            resultObj.put("fault_location", "3");
-        } else if (faultType == "changerate") {
-            resultObj.put("symptom_id", 14);
-            resultObj.put("symptom_desc", "Water pressure changerate big than 10 Pa/s");
-            resultObj.put("fault_location", "3");
+        JSONArray mHeatingSymtpom = databaseSymptom.getSymptomHeating();
+        for (int i = 0; i < mHeatingSymtpom.length(); i++) {
+            JSONObject mObj = mHeatingSymtpom.getJSONObject(i);
+            if (faultType.equals("value") && !mObj.getString("parameter_value_oper").isEmpty()) {
+                float valueInSymptom = Float.parseFloat(mObj.getString("parameter_value"));
+                float mFaultValue = Float.parseFloat(faultValue);
+                if (mObj.getString("parameter_value_oper") == "less") {
+                    if (mFaultValue < valueInSymptom) {
+                        resultObj.put("symptom_id", mObj.getInt("symptom_id"));
+                        resultObj.put("symptom_desc", "Temperatur less than" + mObj.getString("parameter_value") + "Degress");
+                        resultObj.put("fault_location", mObj.getString(mObj.getString("component_id")));
+                    }
+                } else if (mObj.getString("parameter_value_oper") == "bigger") {
+                    if (mFaultValue > valueInSymptom) {
+                        resultObj.put("symptom_id", mObj.getInt("symptom_id"));
+                        resultObj.put("symptom_desc", "Temperatur bigger than" + mObj.getString("parameter_value") + "Degress");
+                        resultObj.put("fault_location", mObj.getString(mObj.getString("component_id")));
+                    }
+                } else {
+                    // will not happend in theory
+                }
+            } else if (faultType.equals("changerate") && !mObj.getString("parameter_changerate_oper").isEmpty()) {
+                float valueInSymptom = Float.parseFloat(mObj.getString("parameter_changerate"));
+                float mFaultValue = Float.parseFloat(faultValue);
+                if (mObj.getString("parameter_changerate_oper") == "less") {
+                    if (mFaultValue < valueInSymptom) {
+                        resultObj.put("symptom_id", mObj.getInt("symptom_id"));
+                        resultObj.put("symptom_desc", "Temperatur changerate less than" + mObj.getString("parameter_value") + "s/Degress");
+                        resultObj.put("fault_location", mObj.getString(mObj.getString("component_id")));
+                    }
+                } else if (mObj.getString("parameter_changerate_oper") == "bigger") {
+                    if (mFaultValue > valueInSymptom) {
+                        resultObj.put("symptom_id", mObj.getInt("symptom_id"));
+                        resultObj.put("symptom_desc", "Temperatur changerate bigger than" + mObj.getString("parameter_value") + "s/Degress");
+                        resultObj.put("fault_location", mObj.getString(mObj.getString("component_id")));
+                    }
+                } else {
+                    // will not happend in theory
+                }
+            } else if (faultType.equals("trend")) {
+                // Todo: not implemented
+            } else {
+                resultObj.put("symptom_id", 15);
+                resultObj.put("symptom_desc", "Temperatur Subsystem Defekt");
+                resultObj.put("fault_location", "2");
+            }
         }
+        analysisProcedure.write("Compare Symptom Subsystem Pumping Result dump: ");
+        System.out.println(resultObj.toString());
         return resultObj;
     }
 
-    private JSONObject symptomInflowAnalysis(String faultLocation, String faultType, String faultValue, String equipmentID) {
+    private JSONObject symptomInflowAnalysis(String faultLocation, String faultType, String faultParam, String faultValue, String equipmentID) throws SQLException, NamingException {
         JSONObject resultObj = new JSONObject();
-        if (faultType == "value") {
-            resultObj.put("symptom_id", 8);
-            resultObj.put("symptom_desc", "Water level bigger than 9 L");
-            resultObj.put("fault_location", "3");
-        } else if (faultType == "changerate") {
-            resultObj.put("symptom_id", 8);
-            resultObj.put("symptom_desc", "Water level changerate bigger than 2 L/s");
-            resultObj.put("fault_location", "3");
+        JSONArray mInflowSymtpom = databaseSymptom.getSymptomInflow();
+        for (int i = 0; i < mInflowSymtpom.length(); i++) {
+            JSONObject mObj = mInflowSymtpom.getJSONObject(i);
+            if (faultType.equals("value") && !mObj.getString("parameter_value_oper").isEmpty()) {
+                float valueInSymptom = Float.parseFloat(mObj.getString("parameter_value"));
+                float mFaultValue = Float.parseFloat(faultValue);
+                if (mObj.getString("parameter_value_oper") == "less") {
+                    if (mFaultValue < valueInSymptom) {
+                        resultObj.put("symptom_id", mObj.getInt("symptom_id"));
+                        resultObj.put("symptom_desc", "Temperatur less than" + mObj.getString("parameter_value") + "Degress");
+                        resultObj.put("fault_location", mObj.getString(mObj.getString("component_id")));
+                    }
+                } else if (mObj.getString("parameter_value_oper") == "bigger") {
+                    if (mFaultValue > valueInSymptom) {
+                        resultObj.put("symptom_id", mObj.getInt("symptom_id"));
+                        resultObj.put("symptom_desc", "Temperatur bigger than" + mObj.getString("parameter_value") + "Degress");
+                        resultObj.put("fault_location", mObj.getString(mObj.getString("component_id")));
+                    }
+                } else {
+                    // will not happend in theory
+                }
+            } else if (faultType.equals("changerate") && !mObj.getString("parameter_changerate_oper").isEmpty()) {
+                float valueInSymptom = Float.parseFloat(mObj.getString("parameter_changerate"));
+                float mFaultValue = Float.parseFloat(faultValue);
+                if (mObj.getString("parameter_changerate_oper") == "less") {
+                    if (mFaultValue < valueInSymptom) {
+                        resultObj.put("symptom_id", mObj.getInt("symptom_id"));
+                        resultObj.put("symptom_desc", "Temperatur changerate less than" + mObj.getString("parameter_value") + "s/Degress");
+                        resultObj.put("fault_location", mObj.getString(mObj.getString("component_id")));
+                    }
+                } else if (mObj.getString("parameter_changerate_oper") == "bigger") {
+                    if (mFaultValue > valueInSymptom) {
+                        resultObj.put("symptom_id", mObj.getInt("symptom_id"));
+                        resultObj.put("symptom_desc", "Temperatur changerate bigger than" + mObj.getString("parameter_value") + "s/Degress");
+                        resultObj.put("fault_location", mObj.getString(mObj.getString("component_id")));
+                    }
+                } else {
+                    // will not happend in theory
+                }
+            } else if (faultType.equals("trend")) {
+                // Todo: not implemented
+            } else {
+                resultObj.put("symptom_id", 15);
+                resultObj.put("symptom_desc", "Temperatur Subsystem Defekt");
+                resultObj.put("fault_location", "2");
+            }
         }
+        analysisProcedure.write("Compare Symptom Subsystem Inflow Result dump: ");
+        System.out.println(resultObj.toString());
         return resultObj;
     }
-    
+
 }

@@ -50,21 +50,21 @@ public class FaultController {
         boolean knownFaultFlag = false;
         JSONArray faultObjs = databaseFault.getFaultKnowledge();
         JSONObject resultObj = new JSONObject();
-        for (int i = 0; i < faultObjs.length(); i++) {
-            if (faultObjs.getJSONObject(i).getString("fault_location").equals(faultLocation)) {
-                knownFaultFlag = true;
-                analysisProcedure.faultInfo.setFaultInfo("Known Fault detected!");
-                analysisProcedure.write("Known Fault detected!");
-                System.out.println();
-                analysisProcedure.write("Following Data will generated from Database: ");
-                resultObj = faultObjs.getJSONObject(i);
-                JSONObject reconfCommand = new JSONObject(resultObj.getString("reconf_command"));
-                JSONObject availableFunctions = new JSONObject(resultObj.getString("available_functions"));
-                resultObj.put("reconf_command", reconfCommand);
-                resultObj.put("available_functions", availableFunctions);
-                System.out.println(resultObj.toString());
-            }
-        }
+//        for (int i = 0; i < faultObjs.length(); i++) {
+//            if (faultObjs.getJSONObject(i).getString("fault_location").equals(faultLocation)) {
+//                knownFaultFlag = true;
+//                analysisProcedure.faultInfo.setFaultInfo("Known Fault detected!");
+//                analysisProcedure.write("Known Fault detected!");
+//                System.out.println();
+//                analysisProcedure.write("Following Data will generated from Database: ");
+//                resultObj = faultObjs.getJSONObject(i);
+//                JSONObject reconfCommand = new JSONObject(resultObj.getString("reconf_command"));
+//                JSONObject availableFunctions = new JSONObject(resultObj.getString("available_functions"));
+//                resultObj.put("reconf_command", reconfCommand);
+//                resultObj.put("available_functions", availableFunctions);
+//                System.out.println(resultObj.toString());
+//            }
+//        }
         if (knownFaultFlag) {
             return resultObj;
         } else {
