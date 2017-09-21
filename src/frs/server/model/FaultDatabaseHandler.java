@@ -150,4 +150,16 @@ public class FaultDatabaseHandler {
         this.releaseConnections();
         return obj;
     }
+
+    public JSONObject resetDatabase() throws SQLException, NamingException {
+        this.initConnections();
+        stmt.executeUpdate("TRUNCATE `fault_knowledge`");
+        stmt.executeUpdate("TRUNCATE `fault_statistic`");
+        this.releaseConnections();
+        JSONObject obj = new JSONObject();
+        obj.put("DatabaseName", "FaultKnowledge");
+        obj.put("active", "reset");
+        obj.put("result", "success");
+        return obj;
+    }
 }

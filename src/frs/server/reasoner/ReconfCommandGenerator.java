@@ -23,8 +23,7 @@ public class ReconfCommandGenerator {
 
     public ReconfCommandGenerator(AnalysisProcedureGenerator analysisProcedure) {
         this.analysisProcedure = analysisProcedure;
-    }
-    
+    }    
 
     public JSONObject generate(JSONObject mAvailableFunction, JSONArray mTaskList) throws SQLException, NamingException {
         JSONObject resultObj = new JSONObject();
@@ -44,7 +43,7 @@ public class ReconfCommandGenerator {
         JSONArray mMainFunctions = mAvailableFunction.getJSONArray("main_functions");
         JSONArray mSubFunctions = mAvailableFunction.getJSONArray("sub_functions");
         JSONArray mBasicFunctions = mAvailableFunction.getJSONArray("basic_functions");
-        String mMainFunctionsCommand = new String("0x");
+        String mMainFunctionsCommand = new String("0b");
         for (int i = 0; i < mMainFunctions.length(); i++) {
             JSONObject obj = mMainFunctions.getJSONObject(i);
             if (obj.getString("availability").equals("true")) {
@@ -53,7 +52,7 @@ public class ReconfCommandGenerator {
                 mMainFunctionsCommand += "0";
             }
         }
-        String mSubFunctionsCommand = new String("0x");
+        String mSubFunctionsCommand = new String("0b");
         for (int i = 0; i < mSubFunctions.length(); i++) {
             JSONObject obj = mSubFunctions.getJSONObject(i);
             if (obj.getString("availability").equals("true")) {
@@ -62,7 +61,7 @@ public class ReconfCommandGenerator {
                 mSubFunctionsCommand += "0";
             }
         }
-        String mBasciFunctionsCommand = new String("0x");
+        String mBasciFunctionsCommand = new String("0b");
         for (int i = 0; i < mBasicFunctions.length(); i++) {
             JSONObject obj = mBasicFunctions.getJSONObject(i);
             if (obj.getString("availability").equals("true")) {

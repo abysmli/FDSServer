@@ -126,8 +126,60 @@ public class SystemDatabaseHandler {
             JSONObject obj = new JSONObject();
             obj.put("function_id", result.getInt(1));
             obj.put("function_desc", result.getString(2));
-            obj.put("status", result.getString(3));
-            obj.put("insert_date", result.getTimestamp(4));
+            obj.put("rule", result.getString(3));
+            obj.put("status", result.getString(4));
+            obj.put("insert_date", result.getTimestamp(5));
+            jsonarray.put(obj);
+        }
+        result.close();
+        this.releaseConnections();
+        return jsonarray;
+    }
+
+    public JSONArray getFunctionsRel() throws SQLException, NamingException {
+        this.initConnections();
+        ResultSet result = stmt.executeQuery("SELECT * FROM functions_rel");
+        JSONArray jsonarray = new JSONArray();
+        while (result.next()) {
+            JSONObject obj = new JSONObject();
+            obj.put("function_name", result.getString(1));
+            obj.put("MF1", result.getInt(2));
+            obj.put("MF2", result.getInt(3));
+            obj.put("MF3", result.getInt(4));
+            obj.put("MF4", result.getInt(5));
+            obj.put("SF1", result.getInt(6));
+            obj.put("SF2", result.getInt(7));
+            obj.put("SF3", result.getInt(8));
+            obj.put("SF4", result.getInt(9));
+            obj.put("SF5", result.getInt(10));
+            obj.put("SF6", result.getInt(11));
+            obj.put("SF7", result.getInt(12));
+            obj.put("BF1", result.getInt(13));
+            obj.put("BF2", result.getInt(14));
+            obj.put("BF3", result.getInt(15));
+            obj.put("BF4", result.getInt(16));
+            obj.put("BF5", result.getInt(17));
+            obj.put("BF6", result.getInt(18));
+            obj.put("BF7", result.getInt(19));
+            obj.put("BF8", result.getInt(20));
+            obj.put("BF9", result.getInt(21));
+            obj.put("BF10", result.getInt(22));
+            obj.put("BF11", result.getInt(23));
+            obj.put("BF12", result.getInt(24));
+            obj.put("BF13", result.getInt(25));
+            obj.put("BF14", result.getInt(26));
+            obj.put("BF15", result.getInt(27));
+            obj.put("BF16", result.getInt(28));
+            obj.put("BF17", result.getInt(29));
+            obj.put("BF18", result.getInt(30));
+            obj.put("BF19", result.getInt(31));
+            obj.put("BF20", result.getInt(32));
+            obj.put("BF21", result.getInt(33));
+            obj.put("BF22", result.getInt(34));
+            obj.put("BF23", result.getInt(35));
+            obj.put("BF24", result.getInt(36));
+            obj.put("BF25", result.getInt(37));
+            obj.put("BF26", result.getInt(38));
             jsonarray.put(obj);
         }
         result.close();
@@ -152,12 +204,12 @@ public class SystemDatabaseHandler {
 
     public JSONArray getComponentFunctionRel() throws SQLException, NamingException {
         this.initConnections();
-        ResultSet result = stmt.executeQuery("SELECT * FROM component_function_rel");
+        ResultSet result = stmt.executeQuery("SELECT * FROM function_component_rel");
         JSONArray jsonarray = new JSONArray();
         while (result.next()) {
             JSONObject obj = new JSONObject();
-            obj.put("component_id", result.getInt(1));
-            obj.put("function_id", result.getInt(2));
+            obj.put("function_id", result.getInt(1));
+            obj.put("component_id", result.getInt(2));
             jsonarray.put(obj);
         }
         result.close();
@@ -454,12 +506,16 @@ public class SystemDatabaseHandler {
         stmt.executeUpdate("UPDATE `function_table` SET `status` = 'active'");
         stmt.executeUpdate("UPDATE `sub_function_table` SET `status` = 'active'");
         stmt.executeUpdate("UPDATE `main_function_table` SET `status` = 'active'");
-        stmt.executeUpdate("UPDATE `requirement_table` SET `status` = 'active'");
-        stmt.executeUpdate("TRUNCATE `fault_table`");
         stmt.executeUpdate("TRUNCATE `runtime_data`");
-        stmt.executeUpdate("TRUNCATE `fault_diagnose_buffer_table`");
+        stmt.executeUpdate("TRUNCATE `analysis_procedure_buffer`");
+        stmt.executeUpdate("TRUNCATE `rebind_component`");
+        stmt.executeUpdate("TRUNCATE `rebind_function`");
+        stmt.executeUpdate("TRUNCATE `reconfiguration_table`");
+        stmt.executeUpdate("TRUNCATE `replace_function`");
         this.releaseConnections();
         JSONObject obj = new JSONObject();
+        obj.put("DatabaseName", "SystemKnowledge");
+        obj.put("active", "reset");
         obj.put("result", "success");
         return obj;
     }
@@ -490,7 +546,8 @@ public class SystemDatabaseHandler {
             obj.put("sub_requirement_id", result.getInt(1));
             obj.put("sub_requirement_name", result.getString(2));
             obj.put("rule", result.getString(3));
-            obj.put("insert_date", result.getTimestamp(4));
+            obj.put("consequence", result.getString(4));
+            obj.put("insert_date", result.getTimestamp(5));
             jsonarray.put(obj);
         }
         result.close();
