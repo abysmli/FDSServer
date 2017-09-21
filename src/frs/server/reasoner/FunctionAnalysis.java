@@ -229,7 +229,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": MF1 = SF1 * SF5 * SF6");
+        analysisProcedure.write(type + " Tree Level " + step + ": MF1 = SF1 * SF5 * SF6");
         boolean flag = SF1(step + 1, type) && SF5(step + 1, type) && SF6(step + 1, type);
         String resultString = String.valueOf(flag);
         stepInfo = new JSONObject();
@@ -245,7 +245,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": MF1 = SF1 * SF5 * SF6 = " + resultString);
+        analysisProcedure.write(type + " Tree Level " + step + ": MF1 = SF1 * SF5 * SF6 = " + resultString);
         return flag;
     }
 
@@ -263,7 +263,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": MF2 = SF3 * SF6");
+        analysisProcedure.write(type + " Tree Level " + step + ": MF2 = SF3 * SF6");
         boolean flag = SF3(step + 1, type) && SF6(step + 1, type);
         String resultString = String.valueOf(flag);
         stepInfo = new JSONObject();
@@ -279,7 +279,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": MF2 = SF3 * SF6 = " + resultString);
+        analysisProcedure.write(type + " Tree Level " + step + ": MF2 = SF3 * SF6 = " + resultString);
         return flag;
     }
 
@@ -297,7 +297,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": MF3 = SF3 * SF6");
+        analysisProcedure.write(type + " Tree Level " + step + ": MF3 = SF3 * SF6");
         boolean flag = SF3(step + 1, type) && SF6(step + 1, type);
         String resultString = String.valueOf(flag);
         stepInfo = new JSONObject();
@@ -313,7 +313,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": MF3 = SF3 * SF6 = " + resultString);
+        analysisProcedure.write(type + " Tree Level " + step + ": MF3 = SF3 * SF6 = " + resultString);
         return flag;
     }
 
@@ -331,7 +331,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": MF4 = SF6");
+        analysisProcedure.write(type + " Tree Level " + step + ": MF4 = SF6");
         boolean flag = SF6(step + 1, type);
         String resultString = String.valueOf(flag);
         stepInfo = new JSONObject();
@@ -347,7 +347,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": MF4 = SF6 = " + resultString);
+        analysisProcedure.write(type + " Tree Level " + step + ": MF4 = SF6 = " + resultString);
         return flag;
     }
 
@@ -366,7 +366,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF1 = BF1 * BF4 * (BF5 OR BF7)");
+            analysisProcedure.write(type + " Tree Level " + step + ": SF1 = BF1 * BF4 * (BF5 OR BF7)");
             boolean flag = BF1(step + 1, type) && BF4(step + 1, type) && (BF5(step + 1, type) || BF7(step + 1, type));
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -382,7 +382,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF1 = BF1 * BF4 * (BF5 OR BF7) = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": SF1 = BF1 * BF4 * (BF5 OR BF7) = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -398,7 +398,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF1 = false (Directly)");
+            analysisProcedure.write(type + " Tree Level " + step + ": SF1 = false (Directly)");
             return false;
         }
     }
@@ -419,7 +419,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF2 = BF7 * BF11");
+            analysisProcedure.write(type + " Tree Level " + step + ": SF2 = BF7 * BF11");
             if (SF2Flag) {
                 flag = BF7(step + 1, type) && BF11(step + 1, type);
             } else {
@@ -439,7 +439,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF2 = BF7 * BF11 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": SF2 = BF7 * BF11 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -455,7 +455,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF2 = false (Directly)");
+            analysisProcedure.write(type + " Tree Level " + step + ": SF2 = false (Directly)");
             return false;
         }
     }
@@ -475,7 +475,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF3 = BF3 * BF14 * BF21");
+            analysisProcedure.write(type + " Tree Level " + step + ": SF3 = BF3 * BF14 * BF21");
             boolean flag = BF3(step + 1, type) && BF14(step + 1, type) && BF21(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -491,7 +491,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF3 = BF3 * BF14 * BF21 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": SF3 = BF3 * BF14 * BF21 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -507,7 +507,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF3 = false (Directly)");
+            analysisProcedure.write(type + " Tree Level " + step + ": SF3 = false (Directly)");
             return false;
         }
     }
@@ -527,7 +527,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF4 = BF15 * BF16 * BF22 * BF23 * BF24");
+            analysisProcedure.write(type + " Tree Level " + step + ": SF4 = BF15 * BF16 * BF22 * BF23 * BF24");
             boolean flag = BF15(step + 1, type) && BF16(step + 1, type) && BF22(step + 1, type) && BF23(step + 1, type) && BF24(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -543,7 +543,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF4 = BF15 * BF16 * BF22 * BF23 * BF24 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": SF4 = BF15 * BF16 * BF22 * BF23 * BF24 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -559,7 +559,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF4 = false (Directly)");
+            analysisProcedure.write(type + " Tree Level " + step + ": SF4 = false (Directly)");
             return false;
         }
     }
@@ -579,7 +579,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF5 = BF2 * ((BF18 * BF20) OR BF21)");
+            analysisProcedure.write(type + " Tree Level " + step + ": SF5 = BF2 * ((BF18 * BF20) OR BF21)");
             boolean flag = BF2(step + 1, type) && ((BF18(step + 1, type) && BF20(step + 1, type)) || BF21(step + 1, type));
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -595,7 +595,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF5 = BF2 * ((BF18 * BF20) OR BF21) = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": SF5 = BF2 * ((BF18 * BF20) OR BF21) = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -611,7 +611,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF5 = false (Directly)");
+            analysisProcedure.write(type + " Tree Level " + step + ": SF5 = false (Directly)");
             return false;
         }
     }
@@ -631,7 +631,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF6 = BF6 * BF8 * BF9 * BF10 * BF12 * BF13 * BF25 * BF26");
+            analysisProcedure.write(type + " Tree Level " + step + ": SF6 = BF6 * BF8 * BF9 * BF10 * BF12 * BF13 * BF25 * BF26");
             boolean flag = BF6(step + 1, type) && BF8(step + 1, type) && BF9(step + 1, type) && BF10(step + 1, type) && BF12(step + 1, type) && BF13(step + 1, type) && BF25(step + 1, type) && BF26(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -647,7 +647,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF6 = BF6 * BF8 * BF9 * BF10 * BF12 * BF13 * BF25 * BF26 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": SF6 = BF6 * BF8 * BF9 * BF10 * BF12 * BF13 * BF25 * BF26 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -663,7 +663,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF6 = false (Directly)");
+            analysisProcedure.write(type + " Tree Level " + step + ": SF6 = false (Directly)");
             return false;
         }
     }
@@ -683,7 +683,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF7 = BF13 * BF17");
+            analysisProcedure.write(type + " Tree Level " + step + ": SF7 = BF13 * BF17");
             boolean flag = BF13(step + 1, type) && BF17(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -699,7 +699,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF7 = BF13 * BF17 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": SF7 = BF13 * BF17 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -715,7 +715,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": SF7 = false (Directly)");
+            analysisProcedure.write(type + " Tree Level " + step + ": SF7 = false (Directly)");
             return false;
         }
     }
@@ -735,7 +735,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF1 = BF5 OR BF7");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF1 = BF5 OR BF7");
             boolean flag = BF5(step + 1, type) || BF7(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -751,7 +751,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF1 = BF5 OR BF7 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": BF1 = BF5 OR BF7 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -767,7 +767,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF1 = false");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF1 = false");
             return false;
         }
     }
@@ -787,7 +787,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF2 = BF18 * BF19");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF2 = BF18 * BF19");
             boolean flag = BF18(step + 1, type) && BF19(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -803,7 +803,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF2 = BF18 * BF19 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": BF2 = BF18 * BF19 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -819,7 +819,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF2 = false");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF2 = false");
             return false;
         }
     }
@@ -839,7 +839,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF3 = BF21");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF3 = BF21");
             boolean flag = BF21(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -855,7 +855,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF3 = BF21 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": BF3 = BF21 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -871,7 +871,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF3 = false");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF3 = false");
             return false;
         }
     }
@@ -891,7 +891,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF4 = BF1");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF4 = BF1");
             boolean flag = BF1(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -907,7 +907,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF4 = BF1 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": BF4 = BF1 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -923,7 +923,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF4 = false");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF4 = false");
             return false;
         }
     }
@@ -942,7 +942,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": BF5 = "+String.valueOf(checkFunctionDefect("BF5")));
+        analysisProcedure.write(type + " Tree Level " + step + ": BF5 = "+String.valueOf(checkFunctionDefect("BF5")));
         return checkFunctionDefect("BF5");
     }
 
@@ -961,7 +961,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF6 = BF10");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF6 = BF10");
             boolean flag = BF10(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -977,7 +977,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF6 = BF10 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": BF6 = BF10 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -993,7 +993,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF6 = false");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF6 = false");
             return false;
         }
     }
@@ -1012,7 +1012,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": BF7 = "+String.valueOf(checkFunctionDefect("BF7")));
+        analysisProcedure.write(type + " Tree Level " + step + ": BF7 = "+String.valueOf(checkFunctionDefect("BF7")));
         return checkFunctionDefect("BF7");
     }
 
@@ -1030,7 +1030,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": BF8 = "+String.valueOf(checkFunctionDefect("BF8")));
+        analysisProcedure.write(type + " Tree Level " + step + ": BF8 = "+String.valueOf(checkFunctionDefect("BF8")));
         return checkFunctionDefect("BF8");
     }
 
@@ -1049,7 +1049,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF9 = BF10");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF9 = BF10");
             boolean flag = BF10(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -1065,7 +1065,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF9 = BF10 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": BF9 = BF10 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -1081,7 +1081,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF9 = false");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF9 = false");
             return false;
         }
     }
@@ -1101,7 +1101,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF10 = BF8 * BF13 * BF25 * BF26");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF10 = BF8 * BF13 * BF25 * BF26");
             boolean flag = BF8(step + 1, type) && BF13(step + 1, type) && BF25(step + 1, type) && BF26(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -1117,7 +1117,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF10 = BF8 * BF13 * BF25 * BF26 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": BF10 = BF8 * BF13 * BF25 * BF26 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -1133,7 +1133,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF10 = false");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF10 = false");
             return false;
         }
     }
@@ -1153,7 +1153,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF11 = BF5 * BF7");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF11 = BF5 * BF7");
             boolean flag = BF5(step + 1, type) && BF7(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -1169,7 +1169,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF11 = BF5 * BF7 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": BF11 = BF5 * BF7 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -1185,7 +1185,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF11 = false");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF11 = false");
             return false;
         }
     }
@@ -1205,7 +1205,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF12 = BF10");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF12 = BF10");
             boolean flag = BF10(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -1221,7 +1221,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF12 = BF10 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": BF12 = BF10 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -1237,7 +1237,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF12 = false");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF12 = false");
             return false;
         }
     }
@@ -1256,7 +1256,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": BF13 = "+String.valueOf(checkFunctionDefect("BF13")));
+        analysisProcedure.write(type + " Tree Level " + step + ": BF13 = "+String.valueOf(checkFunctionDefect("BF13")));
         return checkFunctionDefect("BF13");
     }
 
@@ -1275,7 +1275,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF14 = BF3 * BF4");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF14 = BF3 * BF4");
             boolean flag = BF3(step + 1, type) && BF4(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -1291,7 +1291,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF14 = BF3 * BF4 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": BF14 = BF3 * BF4 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -1307,7 +1307,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF14 = false");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF14 = false");
             return false;
         }
     }
@@ -1326,7 +1326,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": BF15 = "+String.valueOf(checkFunctionDefect("BF15")));
+        analysisProcedure.write(type + " Tree Level " + step + ": BF15 = "+String.valueOf(checkFunctionDefect("BF15")));
         return checkFunctionDefect("BF15");
     }
 
@@ -1344,7 +1344,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": BF16 = "+String.valueOf(checkFunctionDefect("BF16")));
+        analysisProcedure.write(type + " Tree Level " + step + ": BF16 = "+String.valueOf(checkFunctionDefect("BF16")));
         return checkFunctionDefect("BF16");
     }
 
@@ -1363,7 +1363,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF17 = BF13");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF17 = BF13");
             boolean flag = BF13(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -1379,7 +1379,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF17 = BF13 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": BF17 = BF13 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -1395,7 +1395,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF17 = false");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF17 = false");
             return false;
         }
     }
@@ -1414,7 +1414,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": BF18 = "+String.valueOf(checkFunctionDefect("BF18")));
+        analysisProcedure.write(type + " Tree Level " + step + ": BF18 = "+String.valueOf(checkFunctionDefect("BF18")));
         return checkFunctionDefect("BF18");
     }
 
@@ -1432,7 +1432,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": BF19 = "+String.valueOf(checkFunctionDefect("BF19")));
+        analysisProcedure.write(type + " Tree Level " + step + ": BF19 = "+String.valueOf(checkFunctionDefect("BF19")));
         return checkFunctionDefect("BF19");
     }
 
@@ -1450,7 +1450,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": BF20 = "+String.valueOf(checkFunctionDefect("BF20")));
+        analysisProcedure.write(type + " Tree Level " + step + ": BF20 = "+String.valueOf(checkFunctionDefect("BF20")));
         return checkFunctionDefect("BF20");
     }
 
@@ -1468,7 +1468,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": BF21 = "+String.valueOf(checkFunctionDefect("BF21")));
+        analysisProcedure.write(type + " Tree Level " + step + ": BF21 = "+String.valueOf(checkFunctionDefect("BF21")));
         return checkFunctionDefect("BF21");
     }
 
@@ -1487,7 +1487,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF22 = BF15 * BF16");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF22 = BF15 * BF16");
             boolean flag = BF15(step + 1, type) && BF16(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -1503,7 +1503,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF22 = BF15 * BF16 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": BF22 = BF15 * BF16 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -1519,7 +1519,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF22 = false");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF22 = false");
             return false;
         }
     }
@@ -1539,7 +1539,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF23 = BF22");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF23 = BF22");
             boolean flag = BF22(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -1555,7 +1555,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF23 = BF22 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": BF23 = BF22 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -1571,7 +1571,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF23 = false");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF23 = false");
             return false;
         }
     }
@@ -1591,7 +1591,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF24 = BF22");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF24 = BF22");
             boolean flag = BF22(step + 1, type);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
@@ -1607,7 +1607,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF24 = BF22 = " + resultString);
+            analysisProcedure.write(type + " Tree Level " + step + ": BF24 = BF22 = " + resultString);
             return flag;
         } else {
             JSONObject stepInfo = new JSONObject();
@@ -1623,7 +1623,7 @@ public class FunctionAnalysis {
             } else {
                 requirementDepthSearchAry.put(stepInfo);
             }
-            analysisProcedure.write(type + " Tree Level" + step + ": BF24 = false");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF24 = false");
             return false;
         }
     }
@@ -1642,7 +1642,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": BF25 = "+String.valueOf(checkFunctionDefect("BF25")));
+        analysisProcedure.write(type + " Tree Level " + step + ": BF25 = "+String.valueOf(checkFunctionDefect("BF25")));
         return checkFunctionDefect("BF25");
     }
 
@@ -1660,7 +1660,7 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level" + step + ": BF26 = "+String.valueOf(checkFunctionDefect("BF26")));
+        analysisProcedure.write(type + " Tree Level " + step + ": BF26 = "+String.valueOf(checkFunctionDefect("BF26")));
         return checkFunctionDefect("BF26");
     }
 
