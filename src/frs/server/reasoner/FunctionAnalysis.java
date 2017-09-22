@@ -192,7 +192,7 @@ public class FunctionAnalysis {
         resultObj.put("basic_functions", BasicFunctionsAvailability);
         resultObj.put("sub_functions", SubFunctionsAvailability);
         resultObj.put("main_functions", MainFunctionsAvailability);
-        resultObj.put("Redundanz", bRedundanzFlag);
+        resultObj.put("redundanz", bRedundanzFlag);
         System.out.println();
         analysisProcedure.write("Function Analysis Result dump:");
         System.out.println();

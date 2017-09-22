@@ -8,6 +8,7 @@ package frs.server.reasoner;
 import frs.server.controller.AnalysisProcedureGenerator;
 import frs.server.model.SystemDatabaseHandler;
 import java.sql.SQLException;
+import java.util.Arrays;
 import javax.naming.NamingException;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -45,7 +46,7 @@ public class ReconfCommandGenerator {
         JSONArray mMainFunctions = mFunctionAnalysis.getJSONArray("main_functions");
         JSONArray mSubFunctions = mFunctionAnalysis.getJSONArray("sub_functions");
         JSONArray mBasicFunctions = mFunctionAnalysis.getJSONArray("basic_functions");
-        String mMainFunctionsCommand = new String("0b");
+        String mMainFunctionsCommand = new String("");
         for (int i = 0; i < mMainFunctions.length(); i++) {
             JSONObject obj = mMainFunctions.getJSONObject(i);
             if (obj.getString("availability").equals("true")) {
@@ -54,7 +55,7 @@ public class ReconfCommandGenerator {
                 mMainFunctionsCommand += "0";
             }
         }
-        String mSubFunctionsCommand = new String("0b");
+        String mSubFunctionsCommand = new String("");
         for (int i = 0; i < mSubFunctions.length(); i++) {
             JSONObject obj = mSubFunctions.getJSONObject(i);
             if (obj.getString("availability").equals("true")) {
@@ -63,7 +64,7 @@ public class ReconfCommandGenerator {
                 mSubFunctionsCommand += "0";
             }
         }
-        String mBasciFunctionsCommand = new String("0b");
+        String mBasciFunctionsCommand = new String("");
         for (int i = 0; i < mBasicFunctions.length(); i++) {
             JSONObject obj = mBasicFunctions.getJSONObject(i);
             if (obj.getString("availability").equals("true")) {
@@ -75,9 +76,9 @@ public class ReconfCommandGenerator {
         JSONObject mainFunctionCommand = new JSONObject();
         JSONObject subFunctionCommand = new JSONObject();
         JSONObject basicFunctionCommand = new JSONObject();
-        mainFunctionCommand.put("main_function_command", mMainFunctionsCommand);
-        subFunctionCommand.put("sub_function_command", mSubFunctionsCommand);
-        basicFunctionCommand.put("basic_function_command", mBasciFunctionsCommand);
+        mainFunctionCommand.put("main_function_command", Integer.toString(Integer.parseInt(mMainFunctionsCommand, 2), 16).toUpperCase());
+        subFunctionCommand.put("sub_function_command", Integer.toString(Integer.parseInt(mSubFunctionsCommand, 2), 16).toUpperCase());
+        basicFunctionCommand.put("basic_function_command", Integer.toString(Integer.parseInt(mBasciFunctionsCommand, 2), 16).toUpperCase());
         JSONArray availableCommand = new JSONArray();
         availableCommand.put(mainFunctionCommand);
         availableCommand.put(subFunctionCommand);
@@ -148,6 +149,13 @@ public class ReconfCommandGenerator {
 
     private JSONObject TaskAnalysis(JSONObject reconfSystemChanged, JSONArray mTaskList) throws SQLException, NamingException {
         System.out.println();
+        boolean[] MainfunctionAvailability = new boolean[10];
+        Arrays.fill(MainfunctionAvailability, true);
+        for (int i = 0; i < mFunctionAnalysis.getJSONArray("main_functions").length(); i++) {
+            JSONObject obj = new JSONObject();
+            obj = mFunctionAnalysis.getJSONArray("main_functions").getJSONObject(i);
+            MainfunctionAvailability[obj.getInt("main_function_id")] = (obj.getString("availability").equals("true"));
+        }
         analysisProcedure.write("Step 6: Tasks Analysis...");
         databaseSystem.getTasks();
         JSONArray mTaskAnalysis = new JSONArray();
@@ -163,42 +171,65 @@ public class ReconfCommandGenerator {
             mTaskAnalysisObj.put("task_nr", String.valueOf(i));
             mTaskAnalysisObj.put("task_id", taskObj.getString("task_id"));
             mTaskAnalysisObj.put("task_name", taskObj.getString("task_name"));
+            boolean status = true;
+            String mFulfilled = "fulfilled";
+            String mResult = "normal";
             switch (taskObj.getString("task_id")) {
                 case "1":
+                    status = MainfunctionAvailability[1] && MainfunctionAvailability[4] && MainfunctionAvailability[3];
+                    if (!status) {
+                        mFulfilled = "not fulfilled";
+                        mResult = "blocked";
+                    }
+                    mTaskAnalysisObj.put("function_rule", "MF1 = " + MainfunctionAvailability[1] + ", MF3 = " + MainfunctionAvailability[3] + ", MF4 = " + MainfunctionAvailability[4]);
                     mTaskAnalysisObj.put("resource_rule", "Minimum 8L Water in Tank 102");
                     mTaskAnalysisObj.put("resource_rule_result", "fulfilled");
-                    mTaskAnalysisObj.put("function_rule", "MF1 = true, MF3 = true, MF4 = true");
-                    mTaskAnalysisObj.put("function_rule_result", "fulfilled");
+                    mTaskAnalysisObj.put("function_rule_result", mFulfilled);
                     analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the resource rule: Minimum 8L Water in Tank 102");
-                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the function rule: MF1 = true, MF3 = true, MF4 = true");
-                    mTaskList.getJSONObject(i).put("status", "normal");
+                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " " + mFulfilled + " the function rule: MF1 = " + MainfunctionAvailability[1] + ", MF3 = " + MainfunctionAvailability[3] + ", MF4 = " + MainfunctionAvailability[4]);
+                    mTaskList.getJSONObject(i).put("status", mResult);
                     break;
                 case "2":
+                    status = MainfunctionAvailability[3];
+                    if (!status) {
+                        mFulfilled = "not fulfilled";
+                        mResult = "blocked";
+                    }
                     mTaskAnalysisObj.put("resource_rule", "Minimum 5L Water in Tank 102");
                     mTaskAnalysisObj.put("resource_rule_result", "fulfilled");
-                    mTaskAnalysisObj.put("function_rule", "MF3 = true");
-                    mTaskAnalysisObj.put("function_rule_result", "fulfilled");
+                    mTaskAnalysisObj.put("function_rule", "MF3 = " + MainfunctionAvailability[3]);
+                    mTaskAnalysisObj.put("function_rule_result", mFulfilled);
                     analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the resource rule: Minimum 5L Water in Tank 102");
-                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the function rule: MF3 = true");
-                    mTaskList.getJSONObject(i).put("status", "normal");
+                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " " + mFulfilled + " the function rule: MF3 = " + MainfunctionAvailability[3]);
+                    mTaskList.getJSONObject(i).put("status", mResult);
                     break;
                 case "3":
-                    mTaskAnalysisObj.put("resource_rule", "Minimum 8L Water in Tank 102");
-                    mTaskAnalysisObj.put("resource_rule_result", "fulfilled");
-                    mTaskAnalysisObj.put("function_rule", "MF2 = true");
-                    mTaskAnalysisObj.put("function_rule_result", "fulfilled");
-                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the resource rule: Minimum 8L Water in Tank 102");
-                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the function rule: MF2 = true");
-                    mTaskList.getJSONObject(i).put("status", "normal");
-                    break;
-                case "4":
+                    status = MainfunctionAvailability[2];
+                    if (!status) {
+                        mFulfilled = "not fulfilled";
+                        mResult = "blocked";
+                    }
                     mTaskAnalysisObj.put("resource_rule", "Minimum 3L Water in Tank 102");
                     mTaskAnalysisObj.put("resource_rule_result", "fulfilled");
-                    mTaskAnalysisObj.put("function_rule", "MF1 = true, MF3 = true");
-                    mTaskAnalysisObj.put("function_rule_result", "fulfilled");
+                    mTaskAnalysisObj.put("function_rule", "MF2 = " + MainfunctionAvailability[2]);
+                    mTaskAnalysisObj.put("function_rule_result", mFulfilled);
                     analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the resource rule: Minimum 3L Water in Tank 102");
-                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the function rule: MF1 = true, MF3 = true");
-                    mTaskList.getJSONObject(i).put("status", "normal");
+                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " " + mFulfilled + " the function rule: MF2 = " + MainfunctionAvailability[2]);
+                    mTaskList.getJSONObject(i).put("status", mResult);
+                    break;
+                case "4":
+                    status = MainfunctionAvailability[1] && MainfunctionAvailability[3];
+                    if (!status) {
+                        mFulfilled = "not fulfilled";
+                        mResult = "blocked";
+                    }
+                    mTaskAnalysisObj.put("resource_rule", "Minimum 8L Water in Tank 102");
+                    mTaskAnalysisObj.put("resource_rule_result", "fulfilled");
+                    mTaskAnalysisObj.put("function_rule", "MF1 = " + MainfunctionAvailability[1] + ", MF3 = " + MainfunctionAvailability[3]);
+                    mTaskAnalysisObj.put("function_rule_result", mFulfilled);
+                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " fulfilled the resource rule: Minimum 8L Water in Tank 102");
+                    analysisProcedure.write("Task " + taskObj.getString("task_name") + " " + mFulfilled + " the function rule: MF1 = " + MainfunctionAvailability[1] + ", MF3 = " + MainfunctionAvailability[3]);
+                    mTaskList.getJSONObject(i).put("status", mResult);
                     break;
                 default:
                     break;
@@ -217,9 +248,13 @@ public class ReconfCommandGenerator {
     private String SpecialCodeGenerator(JSONObject mFunctionAnalysis) {
         System.out.println();
         analysisProcedure.write("Step 7: Generating Special Code...");
-        analysisProcedure.write("Special Code: temp = temperaturDisplay2.getTemperatur()");
-        analysisProcedure.reconfigurationInfo.setSpecialCode("temp = temperaturDisplay2.getTemperatur()");
-        return "temp = temperaturDisplay2.getTemperatur()";
+        String mSpecialCode = "";
+        if (mFunctionAnalysis.getBoolean("redundanz")) {
+            mSpecialCode = "temp = temperaturDisplay2.getTemperatur()";
+        }
+        analysisProcedure.write("Special Code: " + mSpecialCode);
+        analysisProcedure.reconfigurationInfo.setSpecialCode(mSpecialCode);
+        return mSpecialCode;
     }
 
     private JSONObject PersonalData() {
