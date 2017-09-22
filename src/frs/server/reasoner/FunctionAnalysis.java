@@ -25,19 +25,22 @@ public class FunctionAnalysis {
     private final SystemDatabaseHandler databaseSystem = new SystemDatabaseHandler();
     private final AnalysisProcedureGenerator analysisProcedure;
     List<String> mTopFunctionsList = new ArrayList<>();
-    Map<String, Boolean> mDefectFunction = new HashMap(); 
+    Map<String, Boolean> mDefectFunction = new HashMap();
     JSONArray depthSearchAry = new JSONArray();
     JSONArray requirementDepthSearchAry = new JSONArray();
-    boolean SF2Flag = true;
+    boolean bFunctionAnalysisRerunFlag = false;
+    boolean bRedundanzFlag = false;
 
     private JSONArray mComponentFunctionRel = new JSONArray();
     private JSONArray mFunctionsRel = new JSONArray();
     private JSONArray mBasicFunctions = new JSONArray();
     private JSONArray mSubFunctions = new JSONArray();
     private JSONArray mMainFunctions = new JSONArray();
-    private JSONArray mBasicRequirements = new JSONArray();
     private JSONArray mSubRequirements = new JSONArray();
     private JSONArray mMainRequirements = new JSONArray();
+    private JSONArray BasicFunctionsAvailability = new JSONArray();
+    private JSONArray SubFunctionsAvailability = new JSONArray();
+    private JSONArray MainFunctionsAvailability = new JSONArray();
 
     public FunctionAnalysis(AnalysisProcedureGenerator analysisProcedure) {
         this.analysisProcedure = analysisProcedure;
@@ -49,13 +52,34 @@ public class FunctionAnalysis {
         mBasicFunctions = databaseSystem.getFunctions();
         mSubFunctions = databaseSystem.getSubfunctions();
         mMainFunctions = databaseSystem.getMainfunctions();
-        mBasicRequirements = databaseSystem.getRequirements();
         mSubRequirements = databaseSystem.getSubRequirements();
         mMainRequirements = databaseSystem.getMainRequirements();
         analysisProcedure.faultLocalizationInfo.setFaultLocation(mFaultLocation);
+        init();
         findTreeTopPoint(mFaultLocation);
         treeDepthSearchLoop(0);
         return generateResult();
+    }
+
+    private void init() {
+        for (int i = 0; i < 26; i++) {
+            JSONObject obj = new JSONObject();
+            obj.put("function_id", i + 1);
+            obj.put("availability", "true");
+            BasicFunctionsAvailability.put(obj);
+        }
+        for (int i = 0; i < 7; i++) {
+            JSONObject obj = new JSONObject();
+            obj.put("sub_function_id", i + 1);
+            obj.put("availability", "true");
+            SubFunctionsAvailability.put(obj);
+        }
+        for (int i = 0; i < 4; i++) {
+            JSONObject obj = new JSONObject();
+            obj.put("main_function_id", i + 1);
+            obj.put("availability", "true");
+            MainFunctionsAvailability.put(obj);
+        }
     }
 
     private void treeDepthSearchLoop(int index) {
@@ -106,7 +130,9 @@ public class FunctionAnalysis {
                 treeDepthSearchLoop(++index);
                 break;
             default:
-                analyseRequirement();
+                if (!bFunctionAnalysisRerunFlag) {
+                    analyseRequirement();
+                }
                 break;
         }
     }
@@ -134,13 +160,16 @@ public class FunctionAnalysis {
                     mDefectFunction.put(mBasicFunctionID, false);
                     for (int k = 0; k < mFunctionsRel.length(); k++) {
                         JSONObject mRel = mFunctionsRel.getJSONObject(k);
-                        if (mRel.getInt(mBasicFunctionID) != 0) {
+                        if (mRel.getInt(mBasicFunctionID) > 1) {
                             mTopFunctionsList.add(mRel.getString("function_name"));
                         }
                     }
                 }
             }
         }
+
+        System.out.println(mDefectFunction.toString());
+        System.out.println(mTopFunctionsList.toString());
         for (int i = 0; i < mTopFunctionsList.size(); i++) {
             String mSubFunctionID = mTopFunctionsList.get(i);
             for (int k = 0; k < mFunctionsRel.length(); k++) {
@@ -150,56 +179,33 @@ public class FunctionAnalysis {
                 }
             }
         }
+        System.out.println(mTopFunctionsList.toString());
     }
 
     private JSONObject generateResult() {
         analysisProcedure.functionAnalysisInfo.setFunctionAnalysis(depthSearchAry);
         analysisProcedure.functionAnalysisInfo.setRequirementAnalysis(requirementDepthSearchAry);
         JSONObject resultObj = new JSONObject();
-        JSONArray BasicFunctions = new JSONArray();
-        JSONArray SubFunctions = new JSONArray();
-        JSONArray MainFunctions = new JSONArray();
-        for (int i = 0; i < 21; i++) {
-            JSONObject obj = new JSONObject();
-            obj.put("function_id", i + 1);
-            if (true) {
-                if (i == 5) {
-                    obj.put("availability", "false");
-                } else {
-                    obj.put("availability", "true");
-                }
-            }
-            BasicFunctions.put(obj);
-        }
-        for (int i = 0; i < 9; i++) {
-            JSONObject obj = new JSONObject();
-            obj.put("sub_function_id", i + 1);
-            obj.put("availability", "true");
-            SubFunctions.put(obj);
-        }
-        for (int i = 0; i < 3; i++) {
-            JSONObject obj = new JSONObject();
-            obj.put("main_function_id", i + 1);
-            obj.put("availability", "true");
-            MainFunctions.put(obj);
-        }
-        analysisProcedure.functionAnalysisInfo.setBasicFunctionAvailability(BasicFunctions);
-        analysisProcedure.functionAnalysisInfo.setSubFunctionAvailability(SubFunctions);
-        analysisProcedure.functionAnalysisInfo.setMainFunctionAvailability(MainFunctions);
-        resultObj.put("basic_functions", BasicFunctions);
-        resultObj.put("sub_functions", SubFunctions);
-        resultObj.put("main_functions", MainFunctions);
+        analysisProcedure.functionAnalysisInfo.setBasicFunctionAvailability(BasicFunctionsAvailability);
+        analysisProcedure.functionAnalysisInfo.setSubFunctionAvailability(SubFunctionsAvailability);
+        analysisProcedure.functionAnalysisInfo.setMainFunctionAvailability(MainFunctionsAvailability);
+        resultObj.put("basic_functions", BasicFunctionsAvailability);
+        resultObj.put("sub_functions", SubFunctionsAvailability);
+        resultObj.put("main_functions", MainFunctionsAvailability);
+        resultObj.put("Redundanz", bRedundanzFlag);
         System.out.println();
         analysisProcedure.write("Function Analysis Result dump:");
         System.out.println();
         analysisProcedure.write("Basic Functions Availability:");
-        System.out.println(BasicFunctions.toString());
+        System.out.println(BasicFunctionsAvailability.toString());
         System.out.println();
         analysisProcedure.write("Sub Functions Availability:");
-        System.out.println(SubFunctions.toString());
+        System.out.println(SubFunctionsAvailability.toString());
         System.out.println();
         analysisProcedure.write("Main Functions Availability:");
-        System.out.println(MainFunctions.toString());
+        System.out.println(MainFunctionsAvailability.toString());
+        System.out.println();
+        analysisProcedure.write("redundanz: " + bRedundanzFlag);
         return resultObj;
     }
 
@@ -212,6 +218,9 @@ public class FunctionAnalysis {
         } else {
             System.out.println();
             analysisProcedure.write("System is not runnable!");
+        }
+        if (bFunctionAnalysisRerunFlag) {
+            treeDepthSearchLoop(0);
         }
     }
 
@@ -231,6 +240,7 @@ public class FunctionAnalysis {
         }
         analysisProcedure.write(type + " Tree Level " + step + ": MF1 = SF1 * SF5 * SF6");
         boolean flag = SF1(step + 1, type) && SF5(step + 1, type) && SF6(step + 1, type);
+        setFunctionAvailability("MF1", flag);
         String resultString = String.valueOf(flag);
         stepInfo = new JSONObject();
         stepInfo.put("id", "MF1");
@@ -265,6 +275,7 @@ public class FunctionAnalysis {
         }
         analysisProcedure.write(type + " Tree Level " + step + ": MF2 = SF3 * SF6");
         boolean flag = SF3(step + 1, type) && SF6(step + 1, type);
+        setFunctionAvailability("MF2", flag);
         String resultString = String.valueOf(flag);
         stepInfo = new JSONObject();
         stepInfo.put("id", "MF2");
@@ -299,6 +310,7 @@ public class FunctionAnalysis {
         }
         analysisProcedure.write(type + " Tree Level " + step + ": MF3 = SF3 * SF6");
         boolean flag = SF3(step + 1, type) && SF6(step + 1, type);
+        setFunctionAvailability("MF3", flag);
         String resultString = String.valueOf(flag);
         stepInfo = new JSONObject();
         stepInfo.put("id", "MF3");
@@ -333,6 +345,7 @@ public class FunctionAnalysis {
         }
         analysisProcedure.write(type + " Tree Level " + step + ": MF4 = SF6");
         boolean flag = SF6(step + 1, type);
+        setFunctionAvailability("MF4", flag);
         String resultString = String.valueOf(flag);
         stepInfo = new JSONObject();
         stepInfo.put("id", "MF4");
@@ -368,6 +381,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": SF1 = BF1 * BF4 * (BF5 OR BF7)");
             boolean flag = BF1(step + 1, type) && BF4(step + 1, type) && (BF5(step + 1, type) || BF7(step + 1, type));
+            setFunctionAvailability("SF1", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "SF1");
@@ -405,7 +419,6 @@ public class FunctionAnalysis {
 
     private boolean SF2(int step, String type) {
         if (checkFunctionDefect("SF2")) {
-            boolean flag = true;
             JSONObject stepInfo = new JSONObject();
             stepInfo.put("id", "SF2");
             stepInfo.put("level", step);
@@ -420,11 +433,8 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": SF2 = BF7 * BF11");
-            if (SF2Flag) {
-                flag = BF7(step + 1, type) && BF11(step + 1, type);
-            } else {
-                flag = false;
-            }
+            boolean flag = BF7(step + 1, type) && BF11(step + 1, type);
+            setFunctionAvailability("SF2", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "SF2");
@@ -477,6 +487,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": SF3 = BF3 * BF14 * BF21");
             boolean flag = BF3(step + 1, type) && BF14(step + 1, type) && BF21(step + 1, type);
+            setFunctionAvailability("SF3", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "SF3");
@@ -529,6 +540,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": SF4 = BF15 * BF16 * BF22 * BF23 * BF24");
             boolean flag = BF15(step + 1, type) && BF16(step + 1, type) && BF22(step + 1, type) && BF23(step + 1, type) && BF24(step + 1, type);
+            setFunctionAvailability("SF4", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "SF4");
@@ -581,6 +593,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": SF5 = BF2 * ((BF18 * BF20) OR BF21)");
             boolean flag = BF2(step + 1, type) && ((BF18(step + 1, type) && BF20(step + 1, type)) || BF21(step + 1, type));
+            setFunctionAvailability("SF5", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "SF5");
@@ -633,6 +646,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": SF6 = BF6 * BF8 * BF9 * BF10 * BF12 * BF13 * BF25 * BF26");
             boolean flag = BF6(step + 1, type) && BF8(step + 1, type) && BF9(step + 1, type) && BF10(step + 1, type) && BF12(step + 1, type) && BF13(step + 1, type) && BF25(step + 1, type) && BF26(step + 1, type);
+            setFunctionAvailability("SF6", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "SF6");
@@ -685,6 +699,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": SF7 = BF13 * BF17");
             boolean flag = BF13(step + 1, type) && BF17(step + 1, type);
+            setFunctionAvailability("SF7", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "SF7");
@@ -737,6 +752,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF1 = BF5 OR BF7");
             boolean flag = BF5(step + 1, type) || BF7(step + 1, type);
+            setFunctionAvailability("BF1", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "BF1");
@@ -789,6 +805,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF2 = BF18 * BF19");
             boolean flag = BF18(step + 1, type) && BF19(step + 1, type);
+            setFunctionAvailability("BF2", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "BF2");
@@ -841,6 +858,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF3 = BF21");
             boolean flag = BF21(step + 1, type);
+            setFunctionAvailability("BF3", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "BF3");
@@ -893,6 +911,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF4 = BF1");
             boolean flag = BF1(step + 1, type);
+            setFunctionAvailability("BF4", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "BF4");
@@ -929,21 +948,29 @@ public class FunctionAnalysis {
     }
 
     private boolean BF5(int step, String type) {
+        boolean result = checkFunctionDefect("BF5");
         JSONObject stepInfo = new JSONObject();
         stepInfo.put("id", "BF5");
         stepInfo.put("level", step);
         stepInfo.put("io", "in");
-        stepInfo.put("result", String.valueOf(checkFunctionDefect("BF5")));
+        stepInfo.put("result", String.valueOf(result));
         stepInfo.put("analysis_type", type);
-        stepInfo.put("rule", "BF5 = " + String.valueOf(checkFunctionDefect("BF5")));
+        stepInfo.put("rule", "BF5 = " + String.valueOf(result));
         stepInfo.put("function_info", getBasicFunctionInfo(5));
+        setFunctionAvailability("BF5", result);
         if (type.equals("Function")) {
             depthSearchAry.put(stepInfo);
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level " + step + ": BF5 = "+String.valueOf(checkFunctionDefect("BF5")));
-        return checkFunctionDefect("BF5");
+        if (result) {
+            analysisProcedure.write(type + " Tree Level " + step + ": BF5 = true");
+        } else {
+            analysisProcedure.write("BF5 is defected. Use BF7 as redundanz.");
+            analysisProcedure.write(type + " Tree Level " + step + ": BF5(BF7) = true");
+            bRedundanzFlag = true;
+        }
+        return true;
     }
 
     private boolean BF6(int step, String type) {
@@ -963,6 +990,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF6 = BF10");
             boolean flag = BF10(step + 1, type);
+            setFunctionAvailability("BF6", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "BF6");
@@ -999,39 +1027,43 @@ public class FunctionAnalysis {
     }
 
     private boolean BF7(int step, String type) {
+        boolean result = checkFunctionDefect("BF7");
         JSONObject stepInfo = new JSONObject();
         stepInfo.put("id", "BF7");
         stepInfo.put("level", step);
         stepInfo.put("io", "in");
-        stepInfo.put("result", String.valueOf(checkFunctionDefect("BF7")));
+        stepInfo.put("result", String.valueOf(result));
         stepInfo.put("analysis_type", type);
-        stepInfo.put("rule", "BF7 = " + String.valueOf(checkFunctionDefect("BF7")));
+        stepInfo.put("rule", "BF7 = " + String.valueOf(result));
         stepInfo.put("function_info", getBasicFunctionInfo(7));
+        setFunctionAvailability("BF7", result);
         if (type.equals("Function")) {
             depthSearchAry.put(stepInfo);
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level " + step + ": BF7 = "+String.valueOf(checkFunctionDefect("BF7")));
-        return checkFunctionDefect("BF7");
+        analysisProcedure.write(type + " Tree Level " + step + ": BF7 = " + String.valueOf(result));
+        return result;
     }
 
     private boolean BF8(int step, String type) {
+        boolean result = checkFunctionDefect("BF8");
         JSONObject stepInfo = new JSONObject();
         stepInfo.put("id", "BF8");
         stepInfo.put("level", step);
         stepInfo.put("io", "in");
-        stepInfo.put("result", String.valueOf(checkFunctionDefect("BF8")));
+        stepInfo.put("result", String.valueOf(result));
         stepInfo.put("analysis_type", type);
-        stepInfo.put("rule", "BF8 = " + String.valueOf(checkFunctionDefect("BF8")));
+        stepInfo.put("rule", "BF8 = " + String.valueOf(result));
         stepInfo.put("function_info", getBasicFunctionInfo(8));
+        setFunctionAvailability("BF8", result);
         if (type.equals("Function")) {
             depthSearchAry.put(stepInfo);
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level " + step + ": BF8 = "+String.valueOf(checkFunctionDefect("BF8")));
-        return checkFunctionDefect("BF8");
+        analysisProcedure.write(type + " Tree Level " + step + ": BF8 = " + String.valueOf(result));
+        return result;
     }
 
     private boolean BF9(int step, String type) {
@@ -1051,6 +1083,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF9 = BF10");
             boolean flag = BF10(step + 1, type);
+            setFunctionAvailability("BF9", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "BF9");
@@ -1103,6 +1136,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF10 = BF8 * BF13 * BF25 * BF26");
             boolean flag = BF8(step + 1, type) && BF13(step + 1, type) && BF25(step + 1, type) && BF26(step + 1, type);
+            setFunctionAvailability("BF10", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "BF10");
@@ -1155,6 +1189,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF11 = BF5 * BF7");
             boolean flag = BF5(step + 1, type) && BF7(step + 1, type);
+            setFunctionAvailability("BF11", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "BF11");
@@ -1207,6 +1242,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF12 = BF10");
             boolean flag = BF10(step + 1, type);
+            setFunctionAvailability("BF12", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "BF12");
@@ -1243,21 +1279,23 @@ public class FunctionAnalysis {
     }
 
     private boolean BF13(int step, String type) {
+        boolean result = checkFunctionDefect("BF13");
         JSONObject stepInfo = new JSONObject();
         stepInfo.put("id", "BF13");
         stepInfo.put("level", step);
         stepInfo.put("io", "in");
-        stepInfo.put("result", String.valueOf(checkFunctionDefect("BF13")));
+        stepInfo.put("result", String.valueOf(result));
         stepInfo.put("analysis_type", type);
-        stepInfo.put("rule", "BF13 = " + String.valueOf(checkFunctionDefect("BF13")));
+        stepInfo.put("rule", "BF13 = " + String.valueOf(result));
         stepInfo.put("function_info", getBasicFunctionInfo(13));
+        setFunctionAvailability("BF13", result);
         if (type.equals("Function")) {
             depthSearchAry.put(stepInfo);
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level " + step + ": BF13 = "+String.valueOf(checkFunctionDefect("BF13")));
-        return checkFunctionDefect("BF13");
+        analysisProcedure.write(type + " Tree Level " + step + ": BF13 = " + String.valueOf(result));
+        return result;
     }
 
     private boolean BF14(int step, String type) {
@@ -1277,6 +1315,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF14 = BF3 * BF4");
             boolean flag = BF3(step + 1, type) && BF4(step + 1, type);
+            setFunctionAvailability("BF14", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "BF14");
@@ -1313,39 +1352,43 @@ public class FunctionAnalysis {
     }
 
     private boolean BF15(int step, String type) {
+        boolean result = checkFunctionDefect("BF15");
         JSONObject stepInfo = new JSONObject();
         stepInfo.put("id", "BF15");
         stepInfo.put("level", step);
         stepInfo.put("io", "in");
-        stepInfo.put("result", String.valueOf(checkFunctionDefect("BF15")));
+        stepInfo.put("result", String.valueOf(result));
         stepInfo.put("analysis_type", type);
-        stepInfo.put("rule", "BF15 = " + String.valueOf(checkFunctionDefect("BF15")));
+        stepInfo.put("rule", "BF15 = " + String.valueOf(result));
         stepInfo.put("function_info", getBasicFunctionInfo(15));
+        setFunctionAvailability("BF15", result);
         if (type.equals("Function")) {
             depthSearchAry.put(stepInfo);
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level " + step + ": BF15 = "+String.valueOf(checkFunctionDefect("BF15")));
-        return checkFunctionDefect("BF15");
+        analysisProcedure.write(type + " Tree Level " + step + ": BF15 = " + String.valueOf(result));
+        return result;
     }
 
     private boolean BF16(int step, String type) {
+        boolean result = checkFunctionDefect("BF16");
         JSONObject stepInfo = new JSONObject();
         stepInfo.put("id", "BF16");
         stepInfo.put("level", step);
         stepInfo.put("io", "in");
-        stepInfo.put("result", String.valueOf(checkFunctionDefect("BF16")));
+        stepInfo.put("result", String.valueOf(result));
         stepInfo.put("analysis_type", type);
-        stepInfo.put("rule", "BF16 = " + String.valueOf(checkFunctionDefect("BF16")));
+        stepInfo.put("rule", "BF16 = " + String.valueOf(result));
         stepInfo.put("function_info", getBasicFunctionInfo(16));
+        setFunctionAvailability("BF16", result);
         if (type.equals("Function")) {
             depthSearchAry.put(stepInfo);
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level " + step + ": BF16 = "+String.valueOf(checkFunctionDefect("BF16")));
-        return checkFunctionDefect("BF16");
+        analysisProcedure.write(type + " Tree Level " + step + ": BF16 = " + String.valueOf(result));
+        return result;
     }
 
     private boolean BF17(int step, String type) {
@@ -1365,6 +1408,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF17 = BF13");
             boolean flag = BF13(step + 1, type);
+            setFunctionAvailability("BF17", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "BF17");
@@ -1401,75 +1445,83 @@ public class FunctionAnalysis {
     }
 
     private boolean BF18(int step, String type) {
+        boolean result = checkFunctionDefect("BF18");
         JSONObject stepInfo = new JSONObject();
         stepInfo.put("id", "BF18");
         stepInfo.put("level", step);
         stepInfo.put("io", "in");
-        stepInfo.put("result", String.valueOf(checkFunctionDefect("BF18")));
+        stepInfo.put("result", String.valueOf(result));
         stepInfo.put("analysis_type", type);
-        stepInfo.put("rule", "BF18 = " + String.valueOf(checkFunctionDefect("BF18")));
+        stepInfo.put("rule", "BF18 = " + String.valueOf(result));
         stepInfo.put("function_info", getBasicFunctionInfo(18));
+        setFunctionAvailability("BF18", result);
         if (type.equals("Function")) {
             depthSearchAry.put(stepInfo);
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level " + step + ": BF18 = "+String.valueOf(checkFunctionDefect("BF18")));
-        return checkFunctionDefect("BF18");
+        analysisProcedure.write(type + " Tree Level " + step + ": BF18 = " + String.valueOf(result));
+        return result;
     }
 
     private boolean BF19(int step, String type) {
+        boolean result = checkFunctionDefect("BF19");
         JSONObject stepInfo = new JSONObject();
         stepInfo.put("id", "BF19");
         stepInfo.put("level", step);
         stepInfo.put("io", "in");
-        stepInfo.put("result", String.valueOf(checkFunctionDefect("BF19")));
+        stepInfo.put("result", String.valueOf(result));
         stepInfo.put("analysis_type", type);
-        stepInfo.put("rule", "BF19 = " + String.valueOf(checkFunctionDefect("BF19")));
+        stepInfo.put("rule", "BF19 = " + String.valueOf(result));
         stepInfo.put("function_info", getBasicFunctionInfo(19));
+        setFunctionAvailability("BF19", result);
         if (type.equals("Function")) {
             depthSearchAry.put(stepInfo);
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level " + step + ": BF19 = "+String.valueOf(checkFunctionDefect("BF19")));
-        return checkFunctionDefect("BF19");
+        analysisProcedure.write(type + " Tree Level " + step + ": BF19 = " + String.valueOf(result));
+        return result;
     }
 
     private boolean BF20(int step, String type) {
+        boolean result = checkFunctionDefect("BF20");
         JSONObject stepInfo = new JSONObject();
         stepInfo.put("id", "BF20");
         stepInfo.put("level", step);
         stepInfo.put("io", "in");
-        stepInfo.put("result", String.valueOf(checkFunctionDefect("BF20")));
+        stepInfo.put("result", String.valueOf(result));
         stepInfo.put("analysis_type", type);
-        stepInfo.put("rule", "BF20 = " + String.valueOf(checkFunctionDefect("BF20")));
+        stepInfo.put("rule", "BF20 = " + String.valueOf(result));
         stepInfo.put("function_info", getBasicFunctionInfo(20));
+        setFunctionAvailability("BF20", result);
         if (type.equals("Function")) {
             depthSearchAry.put(stepInfo);
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level " + step + ": BF20 = "+String.valueOf(checkFunctionDefect("BF20")));
-        return checkFunctionDefect("BF20");
+        analysisProcedure.write(type + " Tree Level " + step + ": BF20 = " + String.valueOf(result));
+        return result;
     }
 
     private boolean BF21(int step, String type) {
+        boolean result = checkFunctionDefect("BF21");
         JSONObject stepInfo = new JSONObject();
         stepInfo.put("id", "BF21");
         stepInfo.put("level", step);
         stepInfo.put("io", "in");
-        stepInfo.put("result", String.valueOf(checkFunctionDefect("BF21")));
+        stepInfo.put("result", String.valueOf(result));
         stepInfo.put("analysis_type", type);
-        stepInfo.put("rule", "BF21 = " + String.valueOf(checkFunctionDefect("BF21")));
+        stepInfo.put("rule", "BF21 = " + String.valueOf(result));
         stepInfo.put("function_info", getBasicFunctionInfo(21));
+        setFunctionAvailability("BF21", result);
         if (type.equals("Function")) {
             depthSearchAry.put(stepInfo);
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level " + step + ": BF21 = "+String.valueOf(checkFunctionDefect("BF21")));
-        return checkFunctionDefect("BF21");
+        analysisProcedure.write(type + " Tree Level " + step + ": BF21 = " + String.valueOf(result));
+        return result;
     }
 
     private boolean BF22(int step, String type) {
@@ -1489,6 +1541,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF22 = BF15 * BF16");
             boolean flag = BF15(step + 1, type) && BF16(step + 1, type);
+            setFunctionAvailability("BF22", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "BF22");
@@ -1541,6 +1594,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF23 = BF22");
             boolean flag = BF22(step + 1, type);
+            setFunctionAvailability("BF23", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "BF23");
@@ -1593,6 +1647,7 @@ public class FunctionAnalysis {
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF24 = BF22");
             boolean flag = BF22(step + 1, type);
+            setFunctionAvailability("BF24", flag);
             String resultString = String.valueOf(flag);
             stepInfo = new JSONObject();
             stepInfo.put("id", "BF24");
@@ -1629,39 +1684,43 @@ public class FunctionAnalysis {
     }
 
     private boolean BF25(int step, String type) {
+        boolean result = checkFunctionDefect("BF25");
         JSONObject stepInfo = new JSONObject();
         stepInfo.put("id", "BF25");
         stepInfo.put("level", step);
         stepInfo.put("io", "in");
-        stepInfo.put("result", String.valueOf(checkFunctionDefect("BF25")));
+        stepInfo.put("result", String.valueOf(result));
         stepInfo.put("analysis_type", type);
-        stepInfo.put("rule", "BF25 = " + String.valueOf(checkFunctionDefect("BF25")));
+        stepInfo.put("rule", "BF25 = " + String.valueOf(result));
         stepInfo.put("function_info", getBasicFunctionInfo(25));
+        setFunctionAvailability("BF25", result);
         if (type.equals("Function")) {
             depthSearchAry.put(stepInfo);
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level " + step + ": BF25 = "+String.valueOf(checkFunctionDefect("BF25")));
-        return checkFunctionDefect("BF25");
+        analysisProcedure.write(type + " Tree Level " + step + ": BF25 = " + String.valueOf(result));
+        return result;
     }
 
     private boolean BF26(int step, String type) {
+        boolean result = checkFunctionDefect("BF26");
         JSONObject stepInfo = new JSONObject();
         stepInfo.put("id", "BF26");
         stepInfo.put("level", step);
         stepInfo.put("io", "in");
-        stepInfo.put("result", String.valueOf(checkFunctionDefect("BF26")));
+        stepInfo.put("result", String.valueOf(result));
         stepInfo.put("analysis_type", type);
-        stepInfo.put("rule", "BF26 = " + String.valueOf(checkFunctionDefect("BF26")));
+        stepInfo.put("rule", "BF26 = " + String.valueOf(result));
         stepInfo.put("function_info", getBasicFunctionInfo(26));
+        setFunctionAvailability("BF26", result);
         if (type.equals("Function")) {
             depthSearchAry.put(stepInfo);
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-        analysisProcedure.write(type + " Tree Level " + step + ": BF26 = "+String.valueOf(checkFunctionDefect("BF26")));
-        return checkFunctionDefect("BF26");
+        analysisProcedure.write(type + " Tree Level " + step + ": BF26 = " + String.valueOf(result));
+        return result;
     }
 
     private boolean MR1(int step, String type) {
@@ -1694,7 +1753,6 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-
         analysisProcedure.write(type + " Tree Level " + step + ": MR1 = (SR2 * SR3) * (SR1 OR (SR2 * SR3)) = " + resultString);
         return flag;
     }
@@ -1729,14 +1787,14 @@ public class FunctionAnalysis {
         } else {
             requirementDepthSearchAry.put(stepInfo);
         }
-
         analysisProcedure.write(type + " Tree Level " + step + ": SR1 = SF2 = " + resultString);
         if (flag) {
-            analysisProcedure.write(type + " of Monitoring Temperatur is fulfilled!");
+            analysisProcedure.write(type + " of [Temperatur Ueberwachen] is fulfilled!");
         } else {
-            analysisProcedure.write(type + " of Monitoring Temperatur is not fulfilled!");
-            SF2Flag = false;
-            analysisProcedure.write(type + " is setted 'false'");
+            bFunctionAnalysisRerunFlag = true;
+            analysisProcedure.write(type + " of [Temperatur Ueberwachen] is not fulfilled!");
+            mDefectFunction.put("SF1", false);
+            analysisProcedure.write(type + " SR1's Consequence SF1 is setted 'false'");
         }
         return flag;
     }
@@ -1772,6 +1830,14 @@ public class FunctionAnalysis {
             requirementDepthSearchAry.put(stepInfo);
         }
         analysisProcedure.write(type + " Tree Level " + step + ": SR2 = SF7 = " + resultString);
+        if (flag) {
+            analysisProcedure.write(type + " of [Wasserdruck Ueberwachen] is fulfilled!");
+        } else {
+            bFunctionAnalysisRerunFlag = true;
+            analysisProcedure.write(type + " of [Wasserdruck Ueberwachen] is not fulfilled!");
+            mDefectFunction.put("SF6", false);
+            analysisProcedure.write(type + " SR2's Consequence SF6 is setted 'false'");
+        }
         return flag;
     }
 
@@ -1806,6 +1872,14 @@ public class FunctionAnalysis {
             requirementDepthSearchAry.put(stepInfo);
         }
         analysisProcedure.write(type + " Tree Level " + step + ": SR3 = SF5 = " + resultString);
+        if (flag) {
+            analysisProcedure.write(type + " of [Fuellstand Ueberwachen] is fulfilled!");
+        } else {
+            bFunctionAnalysisRerunFlag = true;
+            analysisProcedure.write(type + " of [Fuellstand Ueberwachen] is not fulfilled!");
+            mDefectFunction.put("SF3", false);
+            analysisProcedure.write(type + " SR3's Consequence SF3 is setted 'false'");
+        }
         return flag;
     }
 
@@ -1839,13 +1913,36 @@ public class FunctionAnalysis {
         return obj;
     }
 
-    private JSONObject getBasicRequirementInfo(int i) {
-        JSONObject obj = mBasicRequirements.getJSONObject(i - 1);
-        obj.put("desc", obj.getString("requirement_name"));
-        return obj;
-    }
-    
     private boolean checkFunctionDefect(String key) {
         return !mDefectFunction.containsKey(key);
+    }
+
+    private void setFunctionAvailability(String key, boolean availability) {
+        int id = Integer.valueOf(key.substring(2));
+        switch (key.substring(0, 2)) {
+            case "MF":
+                for (int i = 0; i < MainFunctionsAvailability.length(); i++) {
+                    if (MainFunctionsAvailability.getJSONObject(i).getInt("main_function_id") == id) {
+                        MainFunctionsAvailability.getJSONObject(i).put("availability", String.valueOf(availability));
+                    }
+                }
+                break;
+            case "SF":
+                for (int i = 0; i < SubFunctionsAvailability.length(); i++) {
+                    if (SubFunctionsAvailability.getJSONObject(i).getInt("sub_function_id") == id) {
+                        SubFunctionsAvailability.getJSONObject(i).put("availability", String.valueOf(availability));
+                    }
+                }
+                break;
+            case "BF":
+                for (int i = 0; i < BasicFunctionsAvailability.length(); i++) {
+                    if (BasicFunctionsAvailability.getJSONObject(i).getInt("function_id") == id) {
+                        BasicFunctionsAvailability.getJSONObject(i).put("availability", String.valueOf(availability));
+                    }
+                }
+                break;
+            default:
+                break;
+        }
     }
 }

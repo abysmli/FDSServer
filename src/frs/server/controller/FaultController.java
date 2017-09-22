@@ -88,7 +88,7 @@ public class FaultController {
         analysisProcedure.write("Now goto Reconfiguration Commands Generation process...");
         JSONObject mReconfiguration = reconfCommandGenerator.generate(mAvailableFunction, mTaskList);
         System.out.println();
-        analysisProcedure.write("Save new generated Reconfiguration Commands in Database...");
+        analysisProcedure.write("Save new generated Reconfiguration Commands into Database...");
         databaseSystem.saveReconfigurations(mReconfiguration);
         
         System.out.println("\n\n");

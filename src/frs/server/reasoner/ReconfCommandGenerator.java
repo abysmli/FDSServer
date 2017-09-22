@@ -20,29 +20,31 @@ public class ReconfCommandGenerator {
 
     private final SystemDatabaseHandler databaseSystem = new SystemDatabaseHandler();
     private final AnalysisProcedureGenerator analysisProcedure;
+    private JSONObject mFunctionAnalysis = new JSONObject();
 
     public ReconfCommandGenerator(AnalysisProcedureGenerator analysisProcedure) {
         this.analysisProcedure = analysisProcedure;
-    }    
+    }
 
-    public JSONObject generate(JSONObject mAvailableFunction, JSONArray mTaskList) throws SQLException, NamingException {
+    public JSONObject generate(JSONObject mFunctionAnalysis, JSONArray mTaskList) throws SQLException, NamingException {
         JSONObject resultObj = new JSONObject();
-        resultObj.put("command", this.ReconfigurationCommandGenerator(mAvailableFunction));
+        resultObj.put("command", this.ReconfigurationCommandGenerator(mFunctionAnalysis));
         resultObj.put("redundanz", this.RedundanzAnalyse());
-        resultObj.put("restart", this.CheckRestartRequired(mAvailableFunction));
-        resultObj.put("reconf_function", this.ReconfFunctionGenerator(mAvailableFunction));
-        resultObj.put("reconf_systemchange", this.ReconfSystemChangeGenerator(mAvailableFunction, mTaskList));
-        resultObj.put("special_code", this.SpecialCodeGenerator(mAvailableFunction));
+        resultObj.put("restart", this.CheckRestartRequired(mFunctionAnalysis));
+        resultObj.put("reconf_function", this.ReconfFunctionGenerator(mFunctionAnalysis));
+        resultObj.put("reconf_systemchange", this.ReconfSystemChangeGenerator(mFunctionAnalysis, mTaskList));
+        resultObj.put("special_code", this.SpecialCodeGenerator(mFunctionAnalysis));
         resultObj.put("personal_data", this.PersonalData());
         return resultObj;
     }
 
-    private JSONArray ReconfigurationCommandGenerator(JSONObject mAvailableFunction) {
+    private JSONArray ReconfigurationCommandGenerator(JSONObject mFunctionAnalysis) {
         System.out.println();
+        this.mFunctionAnalysis = mFunctionAnalysis;
         analysisProcedure.write("Step 1: Generating Reconfiguration Command...");
-        JSONArray mMainFunctions = mAvailableFunction.getJSONArray("main_functions");
-        JSONArray mSubFunctions = mAvailableFunction.getJSONArray("sub_functions");
-        JSONArray mBasicFunctions = mAvailableFunction.getJSONArray("basic_functions");
+        JSONArray mMainFunctions = mFunctionAnalysis.getJSONArray("main_functions");
+        JSONArray mSubFunctions = mFunctionAnalysis.getJSONArray("sub_functions");
+        JSONArray mBasicFunctions = mFunctionAnalysis.getJSONArray("basic_functions");
         String mMainFunctionsCommand = new String("0b");
         for (int i = 0; i < mMainFunctions.length(); i++) {
             JSONObject obj = mMainFunctions.getJSONObject(i);
@@ -93,14 +95,16 @@ public class ReconfCommandGenerator {
         System.out.println();
         analysisProcedure.write("Step 2: Redundanz Analysis");
         JSONObject obj = new JSONObject();
-        obj.put("function", "F5 - F7");
-        obj.put("component", "C3 - C27");
+        if (mFunctionAnalysis.getBoolean("redundanz")) {
+            obj.put("function", "BF5 - BF7");
+            obj.put("component", "C3 - C27");
+        }
         System.out.println(obj.toString());
         analysisProcedure.reconfigurationInfo.setRedundanzAnalysis(obj);
         return obj;
     }
 
-    private String CheckRestartRequired(JSONObject mAvailableFunction) {
+    private String CheckRestartRequired(JSONObject mFunctionAnalysis) {
         System.out.println();
         analysisProcedure.write("Step 3: Check whether Restart required...");
         analysisProcedure.write("true");
@@ -108,18 +112,18 @@ public class ReconfCommandGenerator {
         return "true";
     }
 
-    private JSONObject ReconfFunctionGenerator(JSONObject mAvailableFunction) {
+    private JSONObject ReconfFunctionGenerator(JSONObject mFunctionAnalysis) {
         System.out.println();
         analysisProcedure.write("Step 4: Generating Reconfiguration Functions...");
-        System.out.println(mAvailableFunction.toString());
-        analysisProcedure.reconfigurationInfo.setReconfigurationFunctions(mAvailableFunction);
-        return mAvailableFunction;
+        System.out.println(mFunctionAnalysis.toString());
+        analysisProcedure.reconfigurationInfo.setReconfigurationFunctions(mFunctionAnalysis);
+        return mFunctionAnalysis;
     }
 
-    private JSONObject ReconfSystemChangeGenerator(JSONObject mAvailableFunction, JSONArray mTaskList) throws SQLException, NamingException {
-        JSONArray BasicFunctions = mAvailableFunction.getJSONArray("basic_functions");
-        JSONArray SubFunctions = mAvailableFunction.getJSONArray("sub_functions");
-        JSONArray MainFunctions = mAvailableFunction.getJSONArray("main_functions");
+    private JSONObject ReconfSystemChangeGenerator(JSONObject mFunctionAnalysis, JSONArray mTaskList) throws SQLException, NamingException {
+        JSONArray BasicFunctions = mFunctionAnalysis.getJSONArray("basic_functions");
+        JSONArray SubFunctions = mFunctionAnalysis.getJSONArray("sub_functions");
+        JSONArray MainFunctions = mFunctionAnalysis.getJSONArray("main_functions");
 
         JSONObject reconfSystemChanged = new JSONObject();
         JSONArray functionFlags = new JSONArray();
@@ -154,7 +158,7 @@ public class ReconfCommandGenerator {
             analysisProcedure.write("Task ID: " + taskObj.getString("task_id"));
             analysisProcedure.write("Task Name: " + taskObj.getString("task_name"));
             // todo: realize the logic
-            
+
             JSONObject mTaskAnalysisObj = new JSONObject();
             mTaskAnalysisObj.put("task_nr", String.valueOf(i));
             mTaskAnalysisObj.put("task_id", taskObj.getString("task_id"));
@@ -210,7 +214,7 @@ public class ReconfCommandGenerator {
         return reconfSystemChanged;
     }
 
-    private String SpecialCodeGenerator(JSONObject mAvailableFunction) {
+    private String SpecialCodeGenerator(JSONObject mFunctionAnalysis) {
         System.out.println();
         analysisProcedure.write("Step 7: Generating Special Code...");
         analysisProcedure.write("Special Code: temp = temperaturDisplay2.getTemperatur()");

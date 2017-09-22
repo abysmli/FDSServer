@@ -108,9 +108,6 @@ public class FaultLocalization {
                     }
                 } else if (mObj.getString("parameter_changerate_oper").equals("bigger")) {
                     if (mFaultValue > valueInSymptom) {
-                        System.out.println(mFaultValue);
-                        System.out.println(valueInSymptom);
-                        System.out.println(mObj.getString("parameter_changerate_oper"));
                         resultObj.put("symptom_id", mObj.getInt("symptom_id"));
                         resultObj.put("symptom_desc", "Temperatur changerate bigger than " + mObj.getString("parameter_changerate") + "s/Degress");
                         resultObj.put("fault_location", mObj.getString("component_id"));
@@ -120,11 +117,12 @@ public class FaultLocalization {
                 }
             } else if (faultType.equals("trend")) {
                 // Todo: not implemented
-            } else {
-                resultObj.put("symptom_id", 15);
-                resultObj.put("symptom_desc", "Temperatur Subsystem Defekt");
-                resultObj.put("fault_location", "2");
             }
+        }
+        if (resultObj.length() == 0) {
+            resultObj.put("symptom_id", 15);
+            resultObj.put("symptom_desc", "Temperatur Subsystem Defekt");
+            resultObj.put("fault_location", "2");
         }
         analysisProcedure.write("Compare Symptom Subsystem Heating Result dump: ");
         System.out.println(resultObj.toString());
@@ -180,11 +178,12 @@ public class FaultLocalization {
                 }
             } else if (faultType.equals("trend")) {
                 // Todo: not implemented
-            } else {
-                resultObj.put("symptom_id", 1);
-                resultObj.put("symptom_desc", "Airpressure Subsystem Defekt");
-                resultObj.put("fault_location", "23");
             }
+        }
+        if (resultObj.length() == 0) {
+            resultObj.put("symptom_id", 1);
+            resultObj.put("symptom_desc", "Airpressure Subsystem Defekt");
+            resultObj.put("fault_location", "23");
         }
         analysisProcedure.write("Compare Symptom Subsystem Airpressure Result dump: ");
         System.out.println(resultObj.toString());
@@ -241,11 +240,12 @@ public class FaultLocalization {
                 }
             } else if (faultType.equals("trend")) {
                 // Todo: not implemented
-            } else {
-                resultObj.put("symptom_id", 1);
-                resultObj.put("symptom_desc", "Pumping Subsystem Defekt");
-                resultObj.put("fault_location", "12,13");
             }
+        }
+        if (resultObj.length() == 0) {
+            resultObj.put("symptom_id", 1);
+            resultObj.put("symptom_desc", "Pumping Subsystem Defekt");
+            resultObj.put("fault_location", "12,13");
         }
         analysisProcedure.write("Compare Symptom Subsystem Pumping Result dump: ");
         System.out.println(resultObj.toString());
@@ -295,11 +295,12 @@ public class FaultLocalization {
                 }
             } else if (faultType.equals("trend")) {
                 // Todo: not implemented
-            } else {
-                resultObj.put("symptom_id", 5);
-                resultObj.put("symptom_desc", "Inflow Subsystem Defekt");
-                resultObj.put("fault_location", "8,18");
             }
+        }
+        if (resultObj.length() == 0) {
+            resultObj.put("symptom_id", 5);
+            resultObj.put("symptom_desc", "Inflow Subsystem Defekt");
+            resultObj.put("fault_location", "8,18");
         }
         analysisProcedure.write("Compare Symptom Subsystem Inflow Result dump: ");
         System.out.println(resultObj.toString());
