@@ -261,7 +261,7 @@ public class ReconfCommandGenerator {
         System.out.println();
         analysisProcedure.write("Step 8: Get Personal Data");
         JSONObject obj = new JSONObject();
-        obj.put("General Techniker", "Wang, Huiqiang +49 123 4567 899");
+        obj.put("General_Techniker", "Wang, Huiqiang +49 123 4567 899");
         obj.put("Wartungsdienst", "Hui, Wangqiang +49 321 2233 899");
         obj.put("Expert", "Qiang, Wangqiang +49 333 4567 888");
         System.out.println(obj.toString());

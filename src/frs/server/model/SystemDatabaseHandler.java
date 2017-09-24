@@ -571,4 +571,19 @@ public class SystemDatabaseHandler {
         this.releaseConnections();
         return jsonarray;
     }
+
+    public JSONArray getSubsystemSubfunctionRel() throws NamingException, SQLException {
+        this.initConnections();
+        ResultSet result = stmt.executeQuery("SELECT * FROM subsystem_subfunction_rel");
+        JSONArray jsonarray = new JSONArray();
+        while (result.next()) {
+            JSONObject obj = new JSONObject();
+            obj.put("subsystem_id", result.getInt(1));
+            obj.put("subfunction_id", result.getInt(2));
+            jsonarray.put(obj);
+        }
+        result.close();
+        this.releaseConnections();
+        return jsonarray;
+    }
 }

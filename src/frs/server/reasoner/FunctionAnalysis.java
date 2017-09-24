@@ -32,6 +32,7 @@ public class FunctionAnalysis {
     boolean bRedundanzFlag = false;
 
     private JSONArray mComponentFunctionRel = new JSONArray();
+    private JSONArray mSubsystemSubfunctionRel = new JSONArray();
     private JSONArray mFunctionsRel = new JSONArray();
     private JSONArray mBasicFunctions = new JSONArray();
     private JSONArray mSubFunctions = new JSONArray();
@@ -48,6 +49,7 @@ public class FunctionAnalysis {
 
     public JSONObject analysis(String mFaultLocation) throws SQLException, NamingException {
         mComponentFunctionRel = databaseSystem.getComponentFunctionRel();
+        mSubsystemSubfunctionRel = databaseSystem.getSubsystemSubfunctionRel();
         mFunctionsRel = databaseSystem.getFunctionsRel();
         mBasicFunctions = databaseSystem.getFunctions();
         mSubFunctions = databaseSystem.getSubfunctions();
@@ -149,36 +151,62 @@ public class FunctionAnalysis {
 
     private void findTreeTopPoint(String mFaultLocation) {
         analysisProcedure.write("Function Analysis Step1: Find Top Main Function by searching Functions Relation Table");
-        String[] mFaultLocations = mFaultLocation.split("-");
+        String[] mFaultLocations = mFaultLocation.split(",");
         mTopFunctionsList = new ArrayList<>();
         for (int i = 0; i < mFaultLocations.length; i++) {
             for (int j = 0; j < mComponentFunctionRel.length(); j++) {
                 JSONObject mObj = mComponentFunctionRel.getJSONObject(j);
-                if (Integer.parseInt(mFaultLocations[i]) == mObj.getInt("component_id")) {
-                    String mBasicFunctionID = "BF" + mObj.getInt("function_id");
-                    System.out.println("Fault Location: " + mFaultLocations[i] + " ===> FunctionID: " + "BF" + mObj.getInt("function_id"));
-                    mDefectFunction.put(mBasicFunctionID, false);
-                    for (int k = 0; k < mFunctionsRel.length(); k++) {
-                        JSONObject mRel = mFunctionsRel.getJSONObject(k);
-                        if (mRel.getInt(mBasicFunctionID) > 1) {
-                            mTopFunctionsList.add(mRel.getString("function_name"));
+                if (mFaultLocations[i].substring(0, 1).equals("C")) {
+                    if (Integer.parseInt(mFaultLocations[i].substring(1)) == mObj.getInt("component_id")) {
+                        String mBasicFunctionID = "BF" + mObj.getInt("function_id");
+                        System.out.println("Fault Location: " + mFaultLocations[i] + " ===> FunctionID: " + "BF" + mObj.getInt("function_id"));
+                        mDefectFunction.put(mBasicFunctionID, false);
+                        for (int k = 0; k < mFunctionsRel.length(); k++) {
+                            JSONObject mRel = mFunctionsRel.getJSONObject(k);
+                            if (mRel.getInt(mBasicFunctionID) > 1) {
+                                if (!mTopFunctionsList.contains(mRel.getString("function_name"))) {
+                                    mTopFunctionsList.add(mRel.getString("function_name"));
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-
+        for (int i = 0; i < mFaultLocations.length; i++) {
+            for (int j = 0; j < mSubsystemSubfunctionRel.length(); j++) {
+                JSONObject mObj = mSubsystemSubfunctionRel.getJSONObject(j);
+                if (mFaultLocations[i].substring(0, 1).equals("S")) {
+                    if (Integer.parseInt(mFaultLocations[i].substring(1)) == mObj.getInt("subsystem_id")) {
+                        String mSubFunctionID = "SF" + mObj.getInt("subfunction_id");
+                        System.out.println("Fault Location: " + mFaultLocations[i] + " ===> FunctionID: " + "SF" + mObj.getInt("subfunction_id"));
+                        mDefectFunction.put(mSubFunctionID, false);
+                        for (int k = 0; k < mFunctionsRel.length(); k++) {
+                            JSONObject mRel = mFunctionsRel.getJSONObject(k);
+                            if (mRel.getInt(mSubFunctionID) > 1) {
+                                if (!mTopFunctionsList.contains(mRel.getString("function_name"))) {
+                                    mTopFunctionsList.add(mRel.getString("function_name"));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println("Defected Functions: ");
         System.out.println(mDefectFunction.toString());
-        System.out.println(mTopFunctionsList.toString());
         for (int i = 0; i < mTopFunctionsList.size(); i++) {
             String mSubFunctionID = mTopFunctionsList.get(i);
             for (int k = 0; k < mFunctionsRel.length(); k++) {
                 JSONObject mRel = mFunctionsRel.getJSONObject(k);
                 if (mRel.getInt(mSubFunctionID) != 0) {
-                    mTopFunctionsList.add(mRel.getString("function_name"));
+                    if (!mTopFunctionsList.contains(mRel.getString("function_name"))) {
+                        mTopFunctionsList.add(mRel.getString("function_name"));
+                    }
                 }
             }
         }
+        System.out.println("Tree Top Points: ");
         System.out.println(mTopFunctionsList.toString());
     }
 
@@ -186,6 +214,24 @@ public class FunctionAnalysis {
         analysisProcedure.functionAnalysisInfo.setFunctionAnalysis(depthSearchAry);
         analysisProcedure.functionAnalysisInfo.setRequirementAnalysis(requirementDepthSearchAry);
         JSONObject resultObj = new JSONObject();
+        for (int i = 0; i < BasicFunctionsAvailability.length(); i++) {
+            JSONObject obj = BasicFunctionsAvailability.getJSONObject(i);
+            if (mDefectFunction.containsKey("BF" + obj.getInt("function_id"))) {
+                obj.put("availability", "false");
+            }
+        }
+        for (int i = 0; i < SubFunctionsAvailability.length(); i++) {
+            JSONObject obj = SubFunctionsAvailability.getJSONObject(i);
+            if (mDefectFunction.containsKey("SF" + obj.getInt("sub_function_id"))) {
+                obj.put("availability", "false");
+            }
+        }
+        for (int i = 0; i < MainFunctionsAvailability.length(); i++) {
+            JSONObject obj = MainFunctionsAvailability.getJSONObject(i);
+            if (mDefectFunction.containsKey("MF" + obj.getInt("main_function_id"))) {
+                obj.put("availability", "false");
+            }
+        }
         analysisProcedure.functionAnalysisInfo.setBasicFunctionAvailability(BasicFunctionsAvailability);
         analysisProcedure.functionAnalysisInfo.setSubFunctionAvailability(SubFunctionsAvailability);
         analysisProcedure.functionAnalysisInfo.setMainFunctionAvailability(MainFunctionsAvailability);
@@ -413,6 +459,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": SF1 = false (Directly)");
+            setFunctionAvailability("SF1", false);
             return false;
         }
     }
@@ -466,6 +513,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": SF2 = false (Directly)");
+            setFunctionAvailability("SF2", false);
             return false;
         }
     }
@@ -519,6 +567,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": SF3 = false (Directly)");
+            setFunctionAvailability("SF3", false);
             return false;
         }
     }
@@ -572,6 +621,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": SF4 = false (Directly)");
+            setFunctionAvailability("SF4", false);
             return false;
         }
     }
@@ -625,6 +675,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": SF5 = false (Directly)");
+            setFunctionAvailability("SF5", false);
             return false;
         }
     }
@@ -678,6 +729,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": SF6 = false (Directly)");
+            setFunctionAvailability("SF6", false);
             return false;
         }
     }
@@ -731,6 +783,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": SF7 = false (Directly)");
+            setFunctionAvailability("SF7", false);
             return false;
         }
     }
@@ -784,6 +837,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF1 = false");
+            setFunctionAvailability("BF1", false);
             return false;
         }
     }
@@ -837,6 +891,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF2 = false");
+            setFunctionAvailability("BF2", false);
             return false;
         }
     }
@@ -890,6 +945,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF3 = false");
+            setFunctionAvailability("BF3", false);
             return false;
         }
     }
@@ -943,6 +999,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF4 = false");
+            setFunctionAvailability("BF4", false);
             return false;
         }
     }
@@ -1022,6 +1079,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF6 = false");
+            setFunctionAvailability("BF6", false);
             return false;
         }
     }
@@ -1115,6 +1173,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF9 = false");
+            setFunctionAvailability("BF9", false);
             return false;
         }
     }
@@ -1168,6 +1227,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF10 = false");
+            setFunctionAvailability("BF10", false);
             return false;
         }
     }
@@ -1221,6 +1281,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF11 = false");
+            setFunctionAvailability("BF11", false);
             return false;
         }
     }
@@ -1274,6 +1335,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF12 = false");
+            setFunctionAvailability("BF12", false);
             return false;
         }
     }
@@ -1347,6 +1409,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF14 = false");
+            setFunctionAvailability("BF14", false);
             return false;
         }
     }
@@ -1440,6 +1503,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF17 = false");
+            setFunctionAvailability("BF17", false);
             return false;
         }
     }
@@ -1573,6 +1637,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF22 = false");
+            setFunctionAvailability("BF22", false);
             return false;
         }
     }
@@ -1626,6 +1691,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF23 = false");
+            setFunctionAvailability("BF23", false);
             return false;
         }
     }
@@ -1679,6 +1745,7 @@ public class FunctionAnalysis {
                 requirementDepthSearchAry.put(stepInfo);
             }
             analysisProcedure.write(type + " Tree Level " + step + ": BF24 = false");
+            setFunctionAvailability("BF24", false);
             return false;
         }
     }
@@ -1794,7 +1861,7 @@ public class FunctionAnalysis {
             bFunctionAnalysisRerunFlag = true;
             analysisProcedure.write(type + " of [Temperatur Ueberwachen] is not fulfilled!");
             mDefectFunction.put("SF1", false);
-            analysisProcedure.write(type + " SR1's Consequence SF1 is setted 'false'");
+            analysisProcedure.write(type + " SR1 Consequence SF1 is setted false");
         }
         return flag;
     }
@@ -1836,7 +1903,7 @@ public class FunctionAnalysis {
             bFunctionAnalysisRerunFlag = true;
             analysisProcedure.write(type + " of [Wasserdruck Ueberwachen] is not fulfilled!");
             mDefectFunction.put("SF6", false);
-            analysisProcedure.write(type + " SR2's Consequence SF6 is setted 'false'");
+            analysisProcedure.write(type + " SR2 Consequence SF6 is setted false");
         }
         return flag;
     }
@@ -1878,7 +1945,7 @@ public class FunctionAnalysis {
             bFunctionAnalysisRerunFlag = true;
             analysisProcedure.write(type + " of [Fuellstand Ueberwachen] is not fulfilled!");
             mDefectFunction.put("SF3", false);
-            analysisProcedure.write(type + " SR3's Consequence SF3 is setted 'false'");
+            analysisProcedure.write(type + " SR3 Consequence SF3 is setted false");
         }
         return flag;
     }
